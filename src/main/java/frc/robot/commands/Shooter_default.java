@@ -5,12 +5,16 @@ import frc.robot.subsystems.Shooter;
 
 public class Shooter_default extends Command {
     private final Shooter m_Shooter;
-    private final double m_speed;
+    private final double m_targetRPM;
 
-    public Shooter_default(Shooter shooter, double speed) {
+    /**
+     * Command to run the shooter at a specific RPM
+     * @param shooter The shooter subsystem
+     * @param targetRPM Desired flywheel speed in rotations per minute (e.g., 3000)
+     */
+    public Shooter_default(Shooter shooter, double targetRPM) {
         m_Shooter = shooter;
-        m_speed = speed;
-        // Use addRequirements so two commands don't try to use the intake at once
+        m_targetRPM = targetRPM;
         addRequirements(m_Shooter);
     }
 
@@ -21,8 +25,7 @@ public class Shooter_default extends Command {
     // Called every time the scheduler runs (approx 20ms) while the command is active.
     @Override
     public void execute() {
-        // 0.9 represents 90% power
-        m_Shooter.setMotorSpeed(m_speed); 
+        m_Shooter.setRPM(m_targetRPM);
     }
 
     // Called once the command ends or is interrupted.
