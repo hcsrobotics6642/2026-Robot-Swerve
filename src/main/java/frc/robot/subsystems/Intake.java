@@ -11,8 +11,8 @@ import frc.robot.generated.TunerConstants;
 
 public class Intake extends SubsystemBase {
     // Hardware - Using TalonFXS class for the Talon FX S controller
-    private final TalonFXS m_motor = new TalonFXS(TunerConstants.kIntakeCanId, "");
-    
+    private final TalonFXS m_FrontMotor = new TalonFXS(TunerConstants.kFrontIntakeCanId, "");
+    private final TalonFXS m_RearMotor = new TalonFXS(TunerConstants.kRearIntakeCanId, "");
     // DutyCycleOut handles percentage-based power (-1.0 to 1.0)
     private final DutyCycleOut m_dutyCycleRequest = new DutyCycleOut(0);
 
@@ -31,28 +31,27 @@ public class Intake extends SubsystemBase {
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         // Apply configuration and print status to the console for debugging
-        var status = m_motor.getConfigurator().apply(config);
-        if (!status.isOK()) {
-            System.err.println("Failed to configure intake motor: " + status.toString());
-        } else {
-            System.out.println("Intake motor configured successfully with NEO 2.0 settings");
-        }
+        m_FrontMotor.getConfigurator().apply(config);
+        m_RearMotor.getConfigurator().apply(config);
+       
     }
 
     /**
      * Set motor power using percentage.
      * @param speed from -1.0 to 1.0 (e.g., 0.9 for 90% power)
      */
-    public void setSpeed(double speed) {
+    public void setSpeed(double speed, double Rspeed) {
         // Fixed: Now uses the 'speed' parameter instead of hardcoded 12
-        m_motor.setControl(m_dutyCycleRequest.withOutput(speed));
+        m_FrontMotor.setControl(m_dutyCycleRequest.withOutput(speed));
+        m_RearMotor.setControl(m_dutyCycleRequest.withOutput(Rspeed));
     }
 
     /**
      * Stops the motor immediately.
      */
     public void stop() {
-        m_motor.setControl(m_dutyCycleRequest.withOutput(0));
+        m_FrontMotor.setControl(m_dutyCycleRequest.withOutput(0));
+         m_RearMotor.setControl(m_dutyCycleRequest.withOutput(0));
     }
 
     @Override

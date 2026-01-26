@@ -22,7 +22,7 @@ import frc.robot.subsystems.Intake;
 import frc.robot.commands.RunIntake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.commands.Shooter_default;
-
+import frc.robot.commands.RunIntakeOut;
 
 public class RobotContainer {
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -51,6 +51,7 @@ public class RobotContainer {
        joystick.b().whileTrue(new Shooter_default(m_shooter, 4500));
         
         joystick.a().whileTrue(new RunIntake(m_intake, 0.9));
+        joystick.x().whileTrue(new RunIntakeOut(m_intake, 0.9));
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(

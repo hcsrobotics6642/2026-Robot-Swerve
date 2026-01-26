@@ -3,7 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake;
 
-public class RunIntake extends Command {
+public class RunIntakeOut extends Command {
     private final Intake m_intake;
     private final double m_speed;
     private final double m_Rspeed;
@@ -12,10 +12,11 @@ public class RunIntake extends Command {
      * @param intake The intake subsystem to use.
      * @param speed The speed to run at (-1.0 to 1.0).
      */
-    public RunIntake(Intake intake, double speed, double Rspeed) {
+    public RunIntakeOut(Intake intake, double speed, double Rspeed) {
         m_intake = intake;
-        m_speed = speed;
+        m_speed = -speed;
         m_Rspeed = Rspeed;
+        
         // Tells the scheduler that this command uses the intake
         addRequirements(m_intake);
     }

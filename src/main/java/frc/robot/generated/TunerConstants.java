@@ -167,7 +167,8 @@ public class TunerConstants {
     private static final boolean kBackRightEncoderInverted = false;
 
     //Intake
-    public static final int kIntakeCanId = 20;
+    public static final int kFrontIntakeCanId = 20;
+    public static final int kRearIntakeCanId = 25;
     private static final Distance kBackRightXPos = Inches.of(-10);
     private static final Distance kBackRightYPos = Inches.of(-12.5);
 
@@ -177,6 +178,11 @@ public class TunerConstants {
      //Shooter_Right
      public static final int kShooter_RightCanId = 22;
 
+    //Hopper_Left
+    public static final int kHopper_LeftCanId = 23;
+
+    //Hopper_Right
+    public static final int kHopper_RightCanId = 24;
 
     public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> FrontLeft =
         ConstantCreator.createModuleConstants(
