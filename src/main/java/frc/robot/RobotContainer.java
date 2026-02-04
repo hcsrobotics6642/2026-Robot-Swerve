@@ -50,8 +50,8 @@ public class RobotContainer {
     private void configureBindings() {
        joystick.b().whileTrue(new Shooter_default(m_shooter, 4500));
         
-        joystick.a().whileTrue(new RunIntake(m_intake, 0.9));
-        joystick.x().whileTrue(new RunIntakeOut(m_intake, 0.9));
+        joystick.a().whileTrue(new RunIntake(m_intake, 0.9,-0.9));
+        joystick.x().whileTrue(new RunIntakeOut(m_intake, -0.9,0.9));
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(

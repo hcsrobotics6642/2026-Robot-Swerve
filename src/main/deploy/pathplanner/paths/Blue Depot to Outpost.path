@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.5914204545454544,
+        "y": 5.952068181818181
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 0.8304921199896258,
+        "y": 5.878960461420467
+      },
+      "isLocked": false,
+      "linkedName": "blue shoot 1.2"
+    },
+    {
+      "anchor": {
+        "x": 1.9828409090909087,
+        "y": 3.5608863636363637
+      },
+      "prevControl": {
+        "x": 2.219897727272727,
+        "y": 4.787397727272728
+      },
+      "nextControl": {
+        "x": 1.860430502967198,
+        "y": 2.927545566735425
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.5295795454545453,
+        "y": 0.6440568181818185
+      },
+      "prevControl": {
+        "x": 1.5602613636363634,
+        "y": 2.097318181818182
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "blue human player"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.6820603931726694
+  },
+  "reversed": false,
+  "folder": "blue",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 179.30951287615648
+  },
+  "useDefaultConstraints": true
+}
