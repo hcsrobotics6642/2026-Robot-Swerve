@@ -167,11 +167,12 @@ public class TunerConstants {
     private static final boolean kBackRightEncoderInverted = false;
 
     //Intake
-    public static final int kFrontIntakeCanId = 20;
-    public static final int kRearIntakeCanId = 25;
-    private static final Distance kBackRightXPos = Inches.of(-10);
-    private static final Distance kBackRightYPos = Inches.of(-12.5);
-
+     public static final int kFrontIntakeCanId = 20;
+     public static final int kRearIntakeCanId = 25;
+     private static final Distance kBackRightXPos = Inches.of(-10);
+     private static final Distance kBackRightYPos = Inches.of(-12.5);
+    //Hop_Inches
+     private static int Hop_Inches = 12;
     //Shooter_Left
      public static final int kShooter_LeftCanId = 21;
 
