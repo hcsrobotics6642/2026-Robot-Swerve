@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CommutationConfigs;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFXS;
@@ -13,11 +15,13 @@ import frc.robot.generated.TunerConstants;
 
 public class Shooter extends SubsystemBase {
     // Hardware - Two TalonFXS controllers for two NEO 2.0 motors
-    private final TalonFXS m_leftMotor = new TalonFXS(TunerConstants.kShooter_LeftCanId);
-    private final TalonFXS m_rightMotor = new TalonFXS(TunerConstants.kShooter_RightCanId);
+    private final TalonFXS m_leftMotor = new TalonFXS(TunerConstants.kShooter_LeftCanId,"CC");
+    private final TalonFXS m_rightMotor = new TalonFXS(TunerConstants.kShooter_RightCanId,"CC");
 
     // Control Request for precise RPM
-    private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
+    //private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
+    private final DutyCycleOut m_dutyCycleRequest = new DutyCycleOut(0);
+
 
     public Shooter() {
         TalonFXSConfiguration config = new TalonFXSConfiguration();
@@ -52,12 +56,12 @@ public class Shooter extends SubsystemBase {
     public void setRPM(double targetRPM) {
         // RPS = RPM / 60
         // Only control the left motor - right motor follows automatically
-        m_leftMotor.setControl(m_velocityRequest.withVelocity(targetRPM / 60.0));
-    }
+        m_leftMotor.setControl(m_dutyCycleRequest.withOutput(-1));
+        m_rightMotor.setControl(m_dutyCycleRequest.withOutput(1));    }
 
     public void stop() {
-        m_leftMotor.setControl(m_velocityRequest.withVelocity(0));
-    }
+        m_leftMotor.setControl(m_dutyCycleRequest.withOutput(0));
+        m_rightMotor.setControl(m_dutyCycleRequest.withOutput(0));    } 
 
     @Override
     public void periodic() {

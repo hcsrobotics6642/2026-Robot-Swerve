@@ -11,8 +11,8 @@ import frc.robot.generated.TunerConstants;
 
 public class Intake extends SubsystemBase {
     // Hardware - Using TalonFXS class for the Talon FX S controller
-    private final TalonFXS m_FrontMotor = new TalonFXS(TunerConstants.kFrontIntakeCanId, "");
-    private final TalonFXS m_RearMotor = new TalonFXS(TunerConstants.kRearIntakeCanId, "");
+    private final TalonFXS m_FrontMotor = new TalonFXS(TunerConstants.kFrontIntakeCanId, "CC");
+    private final TalonFXS m_RearMotor = new TalonFXS(TunerConstants.kRearIntakeCanId, "CC");
     // DutyCycleOut handles percentage-based power (-1.0 to 1.0)
     private final DutyCycleOut m_dutyCycleRequest = new DutyCycleOut(0);
 

@@ -14,8 +14,8 @@ import frc.robot.generated.TunerConstants;
 
 public class Hopper extends SubsystemBase {
     // Hardware - Two TalonFXS controllers for two NEO 2.0 motors
-    private final TalonFXS m_leftMotorHopper = new TalonFXS(TunerConstants.kHopper_LeftCanId);
-    private final TalonFXS m_rightMotorHopper = new TalonFXS(TunerConstants.kHopper_RightCanId);
+    private final TalonFXS m_leftMotorHopper = new TalonFXS(TunerConstants.kHopper_LeftCanId,"CC");
+    private final TalonFXS m_rightMotorHopper = new TalonFXS(TunerConstants.kHopper_RightCanId,"CC");
 
     // Control Requests
     private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
