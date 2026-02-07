@@ -11,11 +11,13 @@ import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
+import frc.robot.generated.constants;
+
 
 public class Hopper extends SubsystemBase {
     // Hardware - Two TalonFXS controllers for two NEO 2.0 motors
-    private final TalonFXS m_leftMotorHopper = new TalonFXS(TunerConstants.kHopper_LeftCanId,"CC");
-    private final TalonFXS m_rightMotorHopper = new TalonFXS(TunerConstants.kHopper_RightCanId,"CC");
+    private final TalonFXS m_leftMotorHopper = new TalonFXS(constants.kHopper_LeftCanId,"CC");
+    private final TalonFXS m_rightMotorHopper = new TalonFXS(constants.kHopper_RightCanId,"CC");
 
     // Control Requests
     private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);

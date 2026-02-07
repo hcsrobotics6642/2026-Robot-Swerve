@@ -8,11 +8,12 @@ import com.ctre.phoenix6.signals.MotorArrangementValue; // Required for NEO 2.0 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
+import frc.robot.generated.constants;
 
 public class Intake extends SubsystemBase {
     // Hardware - Using TalonFXS class for the Talon FX S controller
-    private final TalonFXS m_FrontMotor = new TalonFXS(TunerConstants.kFrontIntakeCanId, "CC");
-    private final TalonFXS m_RearMotor = new TalonFXS(TunerConstants.kRearIntakeCanId, "CC");
+    private final TalonFXS m_FrontMotor = new TalonFXS(constants.kFrontIntakeCanId, "CC");
+    private final TalonFXS m_RearMotor = new TalonFXS(constants.kRearIntakeCanId, "CC");
     // DutyCycleOut handles percentage-based power (-1.0 to 1.0)
     private final DutyCycleOut m_dutyCycleRequest = new DutyCycleOut(0);
 

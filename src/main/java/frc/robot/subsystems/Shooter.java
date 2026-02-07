@@ -12,11 +12,12 @@ import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
+import frc.robot.generated.constants;
 
 public class Shooter extends SubsystemBase {
     // Hardware - Two TalonFXS controllers for two NEO 2.0 motors
-    private final TalonFXS m_leftMotor = new TalonFXS(TunerConstants.kShooter_LeftCanId,"CC");
-    private final TalonFXS m_rightMotor = new TalonFXS(TunerConstants.kShooter_RightCanId,"CC");
+    private final TalonFXS m_leftMotor = new TalonFXS(constants.kShooter_LeftCanId,"CC");
+    private final TalonFXS m_rightMotor = new TalonFXS(constants.kShooter_RightCanId,"CC");
 
     // Control Request for precise RPM
     //private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);

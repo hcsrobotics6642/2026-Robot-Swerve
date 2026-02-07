@@ -24,51 +24,60 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.commands.RunIntake;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Climber;
 import frc.robot.commands.Shooter_default;
 import frc.robot.commands.RunIntakeOut;
 import frc.robot.subsystems.Hopper;
 import frc.robot.commands.HopperOut;
+import frc.robot.commands.L_Three_Climb;
+import frc.robot.generated.constants;
 
 public class RobotContainer {
-    private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
-
-    /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.03).withRotationalDeadband(MaxAngularRate * 0.03) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-
-    private final Telemetry logger = new Telemetry(MaxSpeed);
-
-    private final CommandXboxController joystick = new CommandXboxController(0);
-    private final Intake m_intake = new Intake();
-    private final Shooter m_shooter = new Shooter();
-    private final Hopper m_hopper = new Hopper();
-
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-  
-
-    
-
-    public RobotContainer() {
-        configureBindings();
-    }
-
-    private void configureBindings() {
-
-        SequentialCommandGroup Start_Match = new SequentialCommandGroup(
-        new HopperOut(m_hopper, 12));
-
-        SequentialCommandGroup Shoot = new SequentialCommandGroup(
-        new Shooter_default(m_shooter, m_targetRPM));
-
-
-
-
-       joystick.b().whileTrue(new Shooter_default(m_shooter, 4500));
         
+                private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+                private double MaxAngularRate = RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+            
+                /* Setting up bindings for necessary control of the swerve drive platform */
+                private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+                        .withDeadband(MaxSpeed * 0.03).withRotationalDeadband(MaxAngularRate * 0.03) // Add a 10% deadband
+                        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+                private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+                private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+            
+                private final Telemetry logger = new Telemetry(MaxSpeed);
+            
+                private final CommandXboxController joystick = new CommandXboxController(0);
+                private final Intake m_intake = new Intake();
+                private final Shooter m_shooter = new Shooter();
+                private final Hopper m_hopper = new Hopper();
+                private final Climber m_climber = new Climber();
+            
+                public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+              
+            
+                
+            
+                public RobotContainer() {
+                    configureBindings();
+                }
+            
+                private void configureBindings() {
+            
+                    SequentialCommandGroup Start_Match = new SequentialCommandGroup(
+                    new HopperOut(m_hopper, 12));
+
+                    SequentialCommandGroup Shoot = new SequentialCommandGroup(
+                    new Shooter_default(m_shooter, 4500));
+
+
+
+
+        joystick.b().whileTrue(new Shooter_default(m_shooter, 4500));
+        joystick.y().onTrue (Commands.sequence(
+            new L_Three_Climb(m_climber, 22.0),
+            new L_Three_Climb(m_climber, 0.0),
+            new L_Three_Climb(m_climber, 22.0)
+            ));
         joystick.a().whileTrue(new RunIntake(m_intake, 0.9,-0.9));
         joystick.x().whileTrue(new RunIntakeOut(m_intake, -0.9,0.9));
         // Note that X is defined as forward according to WPILib convention,
