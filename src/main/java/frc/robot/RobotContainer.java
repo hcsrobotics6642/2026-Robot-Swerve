@@ -31,6 +31,7 @@ import frc.robot.subsystems.Hopper;
 import frc.robot.commands.HopperOut;
 import frc.robot.commands.L_Three_Climb;
 import frc.robot.generated.constants;
+import com.pathplanner.lib.auto.NamedCommands;
 
 public class RobotContainer {
         
@@ -55,6 +56,17 @@ public class RobotContainer {
                 public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
               
             
+                    SequentialCommandGroup Start_Match = new SequentialCommandGroup(
+                    new HopperOut(m_hopper, 12));
+
+                    SequentialCommandGroup Shoot = new SequentialCommandGroup(
+                    new Shooter_default(m_shooter, 4500));
+
+                    SequentialCommandGroup Climb = new SequentialCommandGroup(
+                    new L_Three_Climb(m_climber, 22.0),
+                    new WaitCommand(0.5),
+                    new L_Three_Climb(m_climber, -5.0));
+
                 
             
                 public RobotContainer() {
@@ -62,12 +74,9 @@ public class RobotContainer {
                 }
             
                 private void configureBindings() {
-            
-                    SequentialCommandGroup Start_Match = new SequentialCommandGroup(
-                    new HopperOut(m_hopper, 12));
-
-                    SequentialCommandGroup Shoot = new SequentialCommandGroup(
-                    new Shooter_default(m_shooter, 4500));
+            NamedCommands.registerCommand("START", Start_Match);
+            NamedCommands.registerCommand("Shoot", Shoot);
+            NamedCommands.registerCommand("Climb", Climb);
 
 
 
@@ -75,7 +84,9 @@ public class RobotContainer {
         joystick.b().whileTrue(new Shooter_default(m_shooter, 4500));
         joystick.y().onTrue (Commands.sequence(
             new L_Three_Climb(m_climber, 22.0),
+            new WaitCommand(0.5),
             new L_Three_Climb(m_climber, 0.0),
+            new WaitCommand(0.5),
             new L_Three_Climb(m_climber, 22.0)
             ));
         joystick.a().whileTrue(new RunIntake(m_intake, 0.9,-0.9));
