@@ -20,12 +20,9 @@ public class Intake extends SubsystemBase {
     public Intake() {
         TalonFXSConfiguration config = new TalonFXSConfiguration();
 
-       CommutationConfigs commutation = new CommutationConfigs();
-        commutation.MotorArrangement = MotorArrangementValue.NEO_JST; // Specific to REV NEO motors
-        config.Commutation = commutation;
-
+        config.Commutation.MotorArrangement = MotorArrangementValue.NEO_JST; // Specific to REV NEO motors
         // Current limits to protect the NEO 2.0 motor from overheating
-        config.CurrentLimits.SupplyCurrentLimit = 30.0;
+        config.CurrentLimits.SupplyCurrentLimit = 40.0;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
         // Neutral mode - Coast allows the intake to spin down naturally
