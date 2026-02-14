@@ -7,39 +7,35 @@ public class RunIntake extends Command {
     private final Intake m_intake;
     private final double m_speed;
     private final double m_Rspeed;
+
     /**
      * Creates a new RunIntake command.
      * @param intake The intake subsystem to use.
-     * @param speed The speed to run at (-1.0 to 1.0).
+     * @param speed The front motor speed (-1.0 to 1.0).
+     * @param Rspeed The rear motor speed (-1.0 to 1.0).
      */
     public RunIntake(Intake intake, double speed, double Rspeed) {
         m_intake = intake;
         m_speed = speed;
         m_Rspeed = Rspeed;
-        // Tells the scheduler that this command uses the intake
         addRequirements(m_intake);
     }
 
     @Override
-    public void initialize() {
-        // No setup needed, but you could log a message here
-    }
+    public void initialize() {}
 
     @Override
     public void execute() {
-        // Continuously set the motor to the desired speed
         m_intake.setSpeed(m_speed, m_Rspeed);
     }
 
     @Override
     public void end(boolean interrupted) {
-        // Stop the motor when the button is released OR the command is cancelled
         m_intake.stop();
     }
 
     @Override
     public boolean isFinished() {
-        // Return false so the command runs as long as the button is held
         return false;
     }
 }

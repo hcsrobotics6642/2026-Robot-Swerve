@@ -1,55 +1,56 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.CommutationConfigs;
-import com.ctre.phoenix6.configs.TalonFXSConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.hardware.TalonFXS;
-import com.ctre.phoenix6.signals.MotorArrangementValue; // Required for NEO 2.0 support
-import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.generated.TunerConstants;
 import frc.robot.generated.constants;
 
 public class Intake extends SubsystemBase {
-    // Hardware - Using TalonFXS class for the Talon FX S controller
-    private final TalonFXS m_FrontMotor = new TalonFXS(constants.kFrontIntakeCanId, "CC");
-    private final TalonFXS m_RearMotor = new TalonFXS(constants.kRearIntakeCanId, "CC");
-    // DutyCycleOut handles percentage-based power (-1.0 to 1.0)
-    private final DutyCycleOut m_dutyCycleRequest = new DutyCycleOut(0);
-
+    // Hardware - Using SparkMax for NEO/NEO 550 motors
+    private final SparkMax m_FrontMotor = new SparkMax(constants.kFrontIntakeCanId, MotorType.kBrushless);
+    private final SparkMax m_RearMotor = new SparkMax(constants.kRearIntakeCanId, MotorType.kBrushless);
+    
     public Intake() {
-        TalonFXSConfiguration config = new TalonFXSConfiguration();
+        /*
+         * Create a configuration object for the Spark Max.
+         * In REVLib 2025+, this is the preferred way to set limits and modes.
+         */
+        SparkMaxConfig config = new SparkMaxConfig();
 
-        config.Commutation.MotorArrangement = MotorArrangementValue.NEO_JST; // Specific to REV NEO motors
-        // Current limits to protect the NEO 2.0 motor from overheating
-        config.CurrentLimits.SupplyCurrentLimit = 40.0;
-        config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        // Current limits to protect the NEO motors
+        config.smartCurrentLimit(40);
 
-        // Neutral mode - Coast allows the intake to spin down naturally
-        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        // Idle mode - kCoast allows the intake to spin down naturally
+        config.idleMode(IdleMode.kCoast);
 
-        // Apply configuration and print status to the console for debugging
-        m_FrontMotor.getConfigurator().apply(config);
-        m_RearMotor.getConfigurator().apply(config);
-       
+        /* * Apply the configuration to the motors.
+         * kResetSafeParameters ensures a clean state, kPersistParameters saves to flash.
+         */
+        m_FrontMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_RearMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     /**
      * Set motor power using percentage.
-     * @param speed from -1.0 to 1.0 (e.g., 0.9 for 90% power)
+     * @param speed from -1.0 to 1.0
+     * @param Rspeed from -1.0 to 1.0
      */
     public void setSpeed(double speed, double Rspeed) {
-        // Fixed: Now uses the 'speed' parameter instead of hardcoded 12
-        m_FrontMotor.setControl(m_dutyCycleRequest.withOutput(speed));
-        m_RearMotor.setControl(m_dutyCycleRequest.withOutput(Rspeed));
+        m_FrontMotor.set(speed);
+        m_RearMotor.set(Rspeed);
     }
 
     /**
-     * Stops the motor immediately.
+     * Stops the motors immediately.
      */
     public void stop() {
-        m_FrontMotor.setControl(m_dutyCycleRequest.withOutput(0));
-         m_RearMotor.setControl(m_dutyCycleRequest.withOutput(0));
+        m_FrontMotor.stopMotor();
+        m_RearMotor.stopMotor();
     }
 
     @Override
