@@ -12,6 +12,14 @@ public class constants {
      public static final int kShooter_LeftCanId = 21;
      public static final int kShooter_RightCanId = 22;
 
+     //Hood
+     public static final int kHoodEncoderCanId = 30;
+     public static final int kHoodCanId = 29;
+
+     //Turret
+     public static final int kTurretCanId = 28;
+     public static final int kTurretEncoderCanId = 31;
+
     //Hopper
      public static final int kHopper_LeftCanId = 23;
      public static final int kHopper_RightCanId = 24;

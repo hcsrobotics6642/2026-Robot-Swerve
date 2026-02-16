@@ -1,103 +1,68 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.CommutationConfigs;
-import com.ctre.phoenix6.configs.TalonFXSConfiguration;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.hardware.TalonFXS;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.signals.MotorArrangementValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.generated.TunerConstants;
 import frc.robot.generated.constants;
 
-
 public class Hopper extends SubsystemBase {
-    // Hardware - Two TalonFXS controllers for two NEO 2.0 motors
-    private final TalonFXS m_leftMotorHopper = new TalonFXS(constants.kHopper_LeftCanId,"CC");
-    private final TalonFXS m_rightMotorHopper = new TalonFXS(constants.kHopper_RightCanId,"CC");
-
-    // Control Requests
-    private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
-    private final PositionVoltage m_positionRequest = new PositionVoltage(0);
-
-    // Physical Constants
-    // 60:1 Gearbox and 3 inches per output revolution
-    // Formula: 60 motor revs / 3 inches = 20 motor revs per inch
-    private final double kRotationsPerInch = 20.0;
+    // Hardware - Two Spark Maxes for the Hopper
+    // No bus name specified, so they default to the roboRIO CAN bus
+    private final SparkMax m_leftHopper = new SparkMax(constants.kHopper_LeftCanId, MotorType.kBrushless);
+    private final SparkMax m_rightHopper = new SparkMax(constants.kHopper_RightCanId, MotorType.kBrushless);
 
     public Hopper() {
-        TalonFXSConfiguration config = new TalonFXSConfiguration();
+        SparkMaxConfig config = new SparkMaxConfig();
+        
+        // Basic configuration
+        config.smartCurrentLimit(30);
 
-        // 1. NEO 2.0 Integration
-        CommutationConfigs commutation = new CommutationConfigs();
-        commutation.MotorArrangement = MotorArrangementValue.NEO_JST;
-        config.Commutation = commutation;
-
-        // 2. PID Gains
-        // Slot 0: Velocity Control (RPM)
-        config.Slot0.kP = 0.11; 
-        config.Slot0.kV = 0.12; 
-
-        // Slot 1: Position Control (Inches)
-        // Note: Position control usually requires a higher P gain than velocity
-        config.Slot1.kP = 2.5;
-        config.Slot1.kD = 0.1;
-
-        // 3. Safety and Neutral Mode
-        config.CurrentLimits.SupplyCurrentLimit = 30.0;
-        config.CurrentLimits.SupplyCurrentLimitEnable = true;
-        config.MotorOutput.NeutralMode = NeutralModeValue.Brake; // Changed to Brake for precision
-
-        // Apply config to both motors
-        m_leftMotorHopper.getConfigurator().apply(config);
-        m_rightMotorHopper.getConfigurator().apply(config);
-
-        // 4. Follower setup
-        m_rightMotorHopper.setControl(new Follower(m_leftMotorHopper.getDeviceID(), MotorAlignmentValue.Opposed));
+        // Apply config to left motor
+        m_leftHopper.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        
+        // Configure right motor to follow the left motor
+        // Set 'true' or 'false' for the second parameter depending on your physical mounting
+        config.follow(m_leftHopper, true);
+        m_rightHopper.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     /**
-     * Set the hopper speed in RPM.
-     * @param targetRPM Desired Rotations Per Minute
+     * Moves the hopper to a specific distance.
+     * @param inches The distance to move.
      */
-    public void setRPM(double targetRPM) {
-        m_leftMotorHopper.setControl(m_velocityRequest.withVelocity(targetRPM / 60.0).withSlot(0));
+    public void setDistance(double inches) {
+        // Convert inches to motor rotations. 
+        // Example: if 1 inch = 2 motor rotations, use (inches * 2.0)
+        double targetRotations = inches * 2.0; 
+        m_leftHopper.getClosedLoopController().setReference(targetRotations, SparkMax.ControlType.kPosition);
     }
 
     /**
-     * Move the hopper a specific distance in inches.
-     * @param targetInches The absolute position in inches
+     * Checks if the hopper has reached its target position.
+     * This fixes the red error in HopperOut.java.
+     * @param target The target position (rotations/inches).
+     * @param tolerance The allowable error (e.g., 0.5).
+     * @return true if the current position is within the tolerance of the target.
      */
-    public void setDistance(double targetInches) {
-        double targetRotations = targetInches * kRotationsPerInch;
-        m_leftMotorHopper.setControl(m_positionRequest.withPosition(targetRotations).withSlot(1));
-    }
-    public boolean isAtPosition(double targetInches, double toleranceInches) {
-    return Math.abs(getPositionInches() - targetInches) < toleranceInches;
-}
-    /**
-     * @return Current position in inches based on motor rotations
-     */
-    public double getPositionInches() {
-        return m_leftMotorHopper.getPosition().getValueAsDouble() / kRotationsPerInch;
+    public boolean isAtPosition(double target, double tolerance) {
+        return Math.abs(m_leftHopper.getEncoder().getPosition() - target) < tolerance;
     }
 
     /**
-     * Resets the encoder to zero inches.
+     * Manually run the hopper at a specific speed.
      */
-    public void resetEncoder() {
-        m_leftMotorHopper.setPosition(0);
+    public void runHopper(double speed) {
+        m_leftHopper.set(speed);
     }
 
+    /**
+     * Stops the hopper motors.
+     */
     public void stop() {
-        m_leftMotorHopper.setControl(m_velocityRequest.withVelocity(0));
-    }
-
-    @Override
-    public void periodic() {
-        // Telemetry or Limelight logic
+        m_leftHopper.stopMotor();
     }
 }
