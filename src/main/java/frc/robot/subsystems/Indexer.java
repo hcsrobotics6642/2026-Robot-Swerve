@@ -4,8 +4,11 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+
+// 2026 UPDATE: Use the top-level com.revrobotics imports
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Indexer extends SubsystemBase {
@@ -19,6 +22,7 @@ public class Indexer extends SubsystemBase {
         // Brake mode helps prevent fuel from coasting forward/backward
         config.smartCurrentLimit(20).idleMode(IdleMode.kBrake);
         
+        // 2026 UPDATE: Using top-level ResetMode and PersistMode
         m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 

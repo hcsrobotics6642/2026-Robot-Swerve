@@ -24,14 +24,26 @@ public class FireFuel extends Command {
 
     @Override
     public void execute() {
-        double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
-        boolean ready = m_shooter.isAtSpeed(100) && Math.abs(tx) < 2.0;
+        // 1. Get Limelight data
+        var table = NetworkTableInstance.getDefault().getTable("limelight");
+        double tx = table.getEntry("tx").getDouble(0);
+        
+        // 2026 IMPROVEMENT: Check if a target is actually visible ('tv')
+        boolean hasTarget = table.getEntry("tv").getDouble(0) == 1.0;
+
+        /* * 2. Determine if we are ready to fire:
+         * - Limelight must see a target (hasTarget)
+         * - Shooter must be at the correct RPM (isAtSpeed)
+         * - Turret must be centered on target (abs(tx) < 2.0 degrees)
+         */
+        boolean ready = hasTarget && m_shooter.isAtSpeed(100) && Math.abs(tx) < 2.0;
 
         if (ready) {
             m_indexer.setPercent(0.8);
             m_controller.getHID().setRumble(RumbleType.kBothRumble, 1.0);
         } else {
             m_indexer.stop();
+            // Stop rumbling so the driver knows they aren't lined up
             m_controller.getHID().setRumble(RumbleType.kBothRumble, 0.0);
         }
     }

@@ -1,35 +1,49 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.filter.MedianFilter;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Hood;
 
 public class AutoAimHood extends Command {
     private final Hood m_hood;
+    private final NetworkTable m_limelightTable;
+    
+    // Smooths out the 'ty' vertical angle over 5 frames (100ms)
+    // This stops the hood from "vibrating" due to camera noise.
+    private final MedianFilter m_tyFilter = new MedianFilter(5);
 
     public AutoAimHood(Hood hood) {
         m_hood = hood;
+        m_limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
         addRequirements(m_hood);
     }
 
     @Override
     public void execute() {
-        // 1. Get distance from Limelight (requires 'ty' and camera height/angle setup)
-        // This is a placeholder for your distance calculation logic
-        double distance = getLimelightDistance(); 
+        // 1. Check if the Limelight actually sees a target ('tv')
+        boolean hasTarget = m_limelightTable.getEntry("tv").getDouble(0) == 1.0;
 
-        // 2. Tell the hood to look up the correct angle for that distance
-        m_hood.setAngleFromDistance(distance);
-    }
+        if (hasTarget) {
+            // 2. Get the vertical angle and run it through the filter
+            double rawTy = m_limelightTable.getEntry("ty").getDouble(0);
+            double filteredTy = m_tyFilter.calculate(rawTy);
 
-    private double getLimelightDistance() {
-        double ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
-        // Standard FRC distance formula: (GoalHeight - CameraHeight) / tan(CameraAngle + ty)
-        return (2.6 - 0.5) / Math.tan(Math.toRadians(30.0 + ty));
+            // 3. Distance math: (GoalHeight - CamHeight) / tan(CamAngle + ty)
+            double distance = (2.6 - 0.5) / Math.tan(Math.toRadians(30.0 + filteredTy));
+
+            // 4. Send to your existing subsystem method
+            m_hood.setAngleFromDistance(distance);
+        } else {
+            // If target is lost, stop moving to prevent damage
+            m_hood.stop();
+        }
     }
 
     @Override
     public void end(boolean interrupted) {
         m_hood.stop();
+        m_tyFilter.reset(); // Clear the filter for next time
     }
 }

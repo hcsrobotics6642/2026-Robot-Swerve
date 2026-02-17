@@ -4,8 +4,10 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+
+// 2026 UPDATED: Top-level imports for Persist and Reset modes
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.constants;
@@ -24,15 +26,31 @@ public class Climber extends SubsystemBase {
         // Setup PID for position control
         config.closedLoop.p(2.0).i(0.0).d(0.1);
 
-        m_leftClimb.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        // Apply configuration using 2026 non-deprecated enums
+        m_leftClimb.configure(
+            config, 
+            ResetMode.kResetSafeParameters, 
+            PersistMode.kPersistParameters
+        );
 
         // Set right to follow left inverted
         config.follow(m_leftClimb, true);
-        m_rightClimb.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_rightClimb.configure(
+            config, 
+            ResetMode.kResetSafeParameters, 
+            PersistMode.kPersistParameters
+        );
     }
 
+    /**
+     * UPDATED: Uses the non-deprecated setSetpoint method for 2026.
+     * This replaces the deprecated setReference method.
+     */
     public void setClimbPosition(double targetRotations) {
-        m_leftClimb.getClosedLoopController().setReference(targetRotations, SparkMax.ControlType.kPosition);
+        m_leftClimb.getClosedLoopController().setSetpoint(
+            targetRotations, 
+            SparkMax.ControlType.kPosition
+        );
     }
 
     public double getLeaderPosition() {
