@@ -7,18 +7,21 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Turret;
+import frc.robot.subsystems.Intake;
 
 public class FireFuel extends Command {
     private final Indexer m_indexer;
     private final Shooter m_shooter;
     private final Turret m_turret;
+    private final Intake m_intake;
     private final CommandXboxController m_controller;
 
-    public FireFuel(Indexer indexer, Shooter shooter, Turret turret, CommandXboxController controller) {
+    public FireFuel( Intake intake, Indexer indexer, Shooter shooter, Turret turret, CommandXboxController controller) {
         m_indexer = indexer;
         m_shooter = shooter;
         m_turret = turret;
         m_controller = controller;
+        m_intake = intake;
         addRequirements(m_indexer);
     }
 
@@ -40,6 +43,7 @@ public class FireFuel extends Command {
 
         if (ready) {
             m_indexer.setPercent(0.8);
+            m_intake.setSpeed(.8, -.8);
             m_controller.getHID().setRumble(RumbleType.kBothRumble, 1.0);
         } else {
             m_indexer.stop();

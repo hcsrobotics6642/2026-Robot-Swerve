@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Blue Start Center to Outpost"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Shoot"
@@ -25,13 +19,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue Outpost To Middle Right"
+            "pathName": "Red Start Left To Center Left"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Blue Middle Right To Tower"
+            "pathName": "Red Center Left To Outpost"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red Outpost to Tower 2"
           }
         },
         {
@@ -50,6 +50,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Blue",
+  "folder": "Red",
   "choreoAuto": false
 }

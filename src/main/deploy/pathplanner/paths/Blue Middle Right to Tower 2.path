@@ -3,39 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 14.16603795967048,
-        "y": 4.051138790036903
+        "x": 7.775272727272727,
+        "y": 2.2003863636363645
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.014333333333333,
-        "y": 1.9419230769230773
+        "x": 3.676858974358975,
+        "y": 2.2442564102564098
       },
       "isLocked": false,
-      "linkedName": "Red Link"
+      "linkedName": "Blue Middle Right"
     },
     {
       "anchor": {
-        "x": 8.793269230769232,
-        "y": 2.3721666666666668
+        "x": 1.5605256410256425,
+        "y": 3.7094102564102567
       },
       "prevControl": {
-        "x": 12.293358974358975,
-        "y": 2.732641025641026
+        "x": 1.7349487179487189,
+        "y": 3.1512564102564102
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Red Center Left"
+      "linkedName": "Blue Tower 2"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.6789473684210531,
+      "waypointRelativePos": 0.3298245614035086,
       "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 0.9175438596491229,
-      "rotationDegrees": -179.75803190141195
     }
   ],
   "constraintZones": [],
@@ -51,10 +47,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -90.0
   },
   "reversed": false,
-  "folder": "red",
+  "folder": "blue",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

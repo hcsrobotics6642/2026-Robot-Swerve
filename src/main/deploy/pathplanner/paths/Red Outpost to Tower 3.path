@@ -3,41 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 14.16603795967048,
-        "y": 4.051138790036903
+        "x": 15.863217948717946,
+        "y": 7.372294871794873
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.014333333333333,
-        "y": 1.9419230769230773
+        "x": 14.188756410256412,
+        "y": 6.035051282051281
       },
       "isLocked": false,
-      "linkedName": "Red Link"
+      "linkedName": "Red Human"
     },
     {
       "anchor": {
-        "x": 8.793269230769232,
-        "y": 2.3721666666666668
+        "x": 14.944589743589743,
+        "y": 3.825692307692308
       },
       "prevControl": {
-        "x": 12.293358974358975,
-        "y": 2.732641025641026
+        "x": 14.859153977814634,
+        "y": 4.060640663563169
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Red Center Left"
+      "linkedName": "Blue Tower 3"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.6789473684210531,
-      "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 0.9175438596491229,
-      "rotationDegrees": -179.75803190141195
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -51,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": "red",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

@@ -121,7 +121,7 @@ public class RobotContainer {
         m_operatorController.start().toggleOnTrue(
             ReadyToShoot.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
         );
-        m_operatorController.rightTrigger().whileTrue(new FireFuel(m_indexer, m_shooter, m_turret, m_operatorController));
+        m_operatorController.rightTrigger().whileTrue(new FireFuel(m_intake, m_indexer, m_shooter, m_turret, m_operatorController));
 
         // Manual Setpoints
         m_operatorController.a().onTrue(new SetHoodAngle(m_hood, 15.0));
