@@ -8,6 +8,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -73,7 +74,25 @@ public class RobotContainer {
     private double getClimberTagOffset() {
         return NetworkTableInstance.getDefault().getTable("limelight-climber").getEntry("tx").getDouble(0);
     }
+    
+    public void periodic() {
+    SmartDashboard.putNumber("Intake/Front Amps", m_intake.getFrontCurrent());
+    SmartDashboard.putNumber("Intake/Rear Amps", m_intake.getRearCurrent());
+    
+    // If current is over 35 Amps, warn the driver with a big red box
+    SmartDashboard.putBoolean("Intake/JAMMED", m_intake.getFrontCurrent() > 35.0);
+}
 
+    // In RobotContainer.java periodic()
+
+    public void checkSystemHealth() {
+    // If the intake is pulling more than 35 Amps, it's jammed!
+    if (m_intake.getFrontCurrent() > 35.0) {
+        m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5);
+    } else {
+        m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0);
+    }
+}
     private void configureBindings() {
         /* --- PATHPLANNER / NAMED COMMANDS --- */
         NamedCommands.registerCommand("START", Start_Match);
@@ -122,6 +141,11 @@ public class RobotContainer {
             ReadyToShoot.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
         );
         m_operatorController.rightTrigger().whileTrue(new FireFuel(m_intake, m_indexer, m_shooter, m_turret, m_operatorController));
+        // In RobotContainer.configureButtonBindings()
+        m_operatorController.povUp().whileTrue(m_climber.run(() -> m_climber.moveManual(0.2)));
+        m_operatorController.povDown().whileTrue(m_climber.run(() -> m_climber.moveManual(-0.2)));
+        m_operatorController.povCenter().onTrue(m_climber.runOnce(() -> m_climber.moveManual(0)));
+
 
         // Manual Setpoints
         m_operatorController.a().onTrue(new SetHoodAngle(m_hood, 15.0));

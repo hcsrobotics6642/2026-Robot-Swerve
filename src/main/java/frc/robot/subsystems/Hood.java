@@ -21,22 +21,36 @@ public class Hood extends SubsystemBase {
     private double m_targetAngle = 0;
     private boolean m_isClosedLoop = false;
 
-    public Hood() {
-        SparkMaxConfig config = new SparkMaxConfig();
-        config.smartCurrentLimit(20).idleMode(IdleMode.kBrake);
-        
-        m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        m_pid.setTolerance(0.5); // 0.5 degree tolerance
-    }
+   public Hood() {
+    SparkMaxConfig config = new SparkMaxConfig();
+    config.smartCurrentLimit(20).idleMode(IdleMode.kBrake);
 
-    @Override
-    public void periodic() {
-        if (m_isClosedLoop) {
-            // Calculate RIO-side PID output
-            double output = m_pid.calculate(getAngle(), m_targetAngle);
-            m_motor.set(output);
-        }
+    // Assuming 0 is flat and 45 is max tilt
+    config.softLimit.reverseSoftLimit(0.0).reverseSoftLimitEnabled(true);
+    config.softLimit.forwardSoftLimit(45.0).forwardSoftLimitEnabled(true);
+    
+    m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_pid.setTolerance(0.5); 
+}
+
+@Override
+public void periodic() {
+    if (m_isClosedLoop) {
+        // 1. Calculate the raw PID output from the RIO-side controller
+        double output = m_pid.calculate(getAngle(), m_targetAngle);
+
+        // 2. Safety Speed Clamp (The "Don't Break the Robot" code)
+        // This limits the motor to 20% power even if the PID wants 100%
+        double maxSpeed = 0.2; 
+        output = Math.copySign(Math.min(Math.abs(output), maxSpeed), output);
+
+        // 3. Set the motor with the safe, clamped output
+        m_motor.set(output);
     }
+    
+    // Optional: Send data to SmartDashboard so you can see the angle while testing
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Hood Angle", getAngle());
+}
 
     public void setAngle(double degrees) {
         m_targetAngle = degrees;

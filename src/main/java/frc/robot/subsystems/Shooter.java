@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -30,9 +31,13 @@ public class Shooter extends SubsystemBase {
         m_rightMotor.setControl(new Follower(m_leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
 
-    public void setRPM(double targetRPM) {
-        m_targetRPM = targetRPM;
-        m_leftMotor.setControl(m_dutyCycleRequest.withOutput(1.0));
+    private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
+    
+   public void setRPM(double targetRPM) {
+    m_targetRPM = targetRPM;
+    // Convert RPM to Rotations per Second for Phoenix 6
+    double rps = targetRPM / 60.0; 
+    m_leftMotor.setControl(m_velocityRequest.withVelocity(rps));
     }
 
     public boolean isAtSpeed(double toleranceRPM) {
@@ -45,10 +50,24 @@ public class Shooter extends SubsystemBase {
         m_leftMotor.setControl(m_dutyCycleRequest.withOutput(0));
     }
 
-    @Override
-    public void periodic() {
-        double currentRPM = Math.abs(m_leftMotor.getVelocity().getValueAsDouble() * 60.0);
-        SmartDashboard.putNumber("Shooter/Current RPM", currentRPM);
-        SmartDashboard.putBoolean("Shooter/At Speed", isAtSpeed(100));
+   // Inside Shooter.java
+@Override
+public void periodic() {
+    // Current draws help you see if a motor is straining
+    double leftCurrent = m_leftMotor.getStatorCurrent().getValueAsDouble();
+    double rightCurrent = m_rightMotor.getStatorCurrent().getValueAsDouble();
+    
+    // Temperatures let you know if you're geared too high
+    double leftTemp = m_leftMotor.getDeviceTemp().getValueAsDouble();
+    
+    SmartDashboard.putNumber("Diagnostics/Shooter Temp (C)", leftTemp);
+    SmartDashboard.putNumber("Diagnostics/Shooter Amps", leftCurrent);
+
+    // Alert the driver if the motors are getting dangerously hot (over 70C)
+    if (leftTemp > 70.0) {
+        SmartDashboard.putBoolean("Diagnostics/SHOOTER OVERHEATING", true);
+    } else {
+        SmartDashboard.putBoolean("Diagnostics/SHOOTER OVERHEATING", false);
     }
+}
 }

@@ -42,6 +42,12 @@ public class Climber extends SubsystemBase {
         );
     }
 
+    public void moveManual(double speed) {
+    // This stops the PID from fighting your manual input
+    // We use set() instead of setSetpoint
+    m_leftClimb.set(speed); 
+}
+
     /**
      * UPDATED: Uses the non-deprecated setSetpoint method for 2026.
      * This replaces the deprecated setReference method.

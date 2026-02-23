@@ -51,4 +51,14 @@ public class Intake extends SubsystemBase {
     public void stop() {
         m_FrontMotor.stopMotor();
     }
+    public double getFrontCurrent() {
+    return m_FrontMotor.getOutputCurrent();
+    }
+
+    public double getRearCurrent() {
+    return m_RearMotor.getOutputCurrent();
+
+     //69 Skibidi rizzler: now code is not auto magical
+
+    }
 }
