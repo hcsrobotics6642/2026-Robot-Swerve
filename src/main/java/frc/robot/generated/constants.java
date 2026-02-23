@@ -28,5 +28,6 @@ public class constants {
     //Climber
      public static final int kClimber_LeftCanId = 26;
      public static final int kClimber_RightCanId = 27;
-
+     // Inside constants.java
+     public static final int kIndexerCanId = 34;
 }

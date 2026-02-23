@@ -168,6 +168,25 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
+        public Command systemCheckCommand() {
+    return Commands.sequence(
+        Commands.print("Starting System Check..."),
+        // 1. Twitch the Intake
+        m_intake.runOnce(() -> m_intake.setSpeed(0.2, 0.2)).withTimeout(0.5),
+        m_intake.runOnce(() -> m_intake.stop()),
+        
+        // 2. Nudge the Turret
+        m_turret.runOnce(() -> m_turret.setSpeed(0.1)).withTimeout(0.3),
+        m_turret.runOnce(() -> m_turret.stop()),
+        
+        // 3. Spin Shooter slowly
+        m_shooter.runOnce(() -> m_shooter.setRPM(500)).withTimeout(1.0),
+        m_shooter.runOnce(() -> m_shooter.stop()),
+        
+        Commands.print("System Check Complete!")
+    ).ignoringDisable(false); // Only runs when enabled
+}
+   
     public Command getAutonomousCommand() {
         final var idle = new SwerveRequest.Idle();
         return Commands.sequence(

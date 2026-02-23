@@ -8,12 +8,12 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 // 2026 UPDATE: Use the top-level com.revrobotics imports
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-
+import frc.robot.generated.constants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Indexer extends SubsystemBase {
-    // Replace 34 with your actual CAN ID
-    private final SparkMax m_motor = new SparkMax(34, MotorType.kBrushless);
+    // Replace the number 34 with the constant name
+    private final SparkMax m_motor = new SparkMax(constants.kIndexerCanId, MotorType.kBrushless);
 
     public Indexer() {
         SparkMaxConfig config = new SparkMaxConfig();
