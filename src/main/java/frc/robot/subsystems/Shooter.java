@@ -1,11 +1,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage; // For RPM control
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue; // For inversion logic
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -15,59 +14,60 @@ import frc.robot.generated.constants;
 public class Shooter extends SubsystemBase {
     private final TalonFX m_leftMotor = new TalonFX(constants.kShooter_LeftCanId);
     private final TalonFX m_rightMotor = new TalonFX(constants.kShooter_RightCanId);
-    private final DutyCycleOut m_dutyCycleRequest = new DutyCycleOut(0);
+    
+    // Velocity request object - Phoenix 6 uses this for closed-loop control
+    private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
     private double m_targetRPM = 0;
 
     public Shooter() {
         TalonFXConfiguration config = new TalonFXConfiguration();
-        config.CurrentLimits.StatorCurrentLimit = 60.0;
+        
+        // Safety & Physics
+        config.CurrentLimits.StatorCurrentLimit = 80.0; 
         config.CurrentLimits.StatorCurrentLimitEnable = true;
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-        m_leftMotor.getConfigurator().apply(config);
-        m_rightMotor.getConfigurator().apply(config);
+        // PID Gains (Slot 0) - These are starting points
+        config.Slot0.kP = constants.kShooter_kP;
+        config.Slot0.kV = constants.kShooter_kV;
 
-        // Right motor follows left but spins the opposite way for a shooter
+        // Apply config to the leader motor
+        m_leftMotor.getConfigurator().apply(config);
+        
+        // Right motor follows left, but spins in the OPPOSITE direction 
+        // to propel the game piece forward.
         m_rightMotor.setControl(new Follower(m_leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
 
-    private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
-    
-   public void setRPM(double targetRPM) {
-    m_targetRPM = targetRPM;
-    // Convert RPM to Rotations per Second for Phoenix 6
-    double rps = targetRPM / 60.0; 
-    m_leftMotor.setControl(m_velocityRequest.withVelocity(rps));
+    /**
+     * Set the target speed of the shooter.
+     * @param targetRPM The desired speed in Revolutions Per Minute.
+     */
+    public void setRPM(double targetRPM) {
+        m_targetRPM = targetRPM;
+        // Phoenix 6 expects Rotations Per Second (RPS)
+        double targetRPS = targetRPM / 60.0;
+        m_leftMotor.setControl(m_velocityRequest.withVelocity(targetRPS));
+    }
+
+    public double getCurrentRPM() {
+        // Refresh the signal and convert RPS to RPM
+        return m_leftMotor.getVelocity().refresh().getValueAsDouble() * 60.0;
     }
 
     public boolean isAtSpeed(double toleranceRPM) {
-        double currentRPM = Math.abs(m_leftMotor.getVelocity().getValueAsDouble() * 60.0);
-        return Math.abs(currentRPM - Math.abs(m_targetRPM)) < toleranceRPM;
+        return Math.abs(getCurrentRPM() - m_targetRPM) < toleranceRPM;
     }
 
     public void stop() {
         m_targetRPM = 0;
-        m_leftMotor.setControl(m_dutyCycleRequest.withOutput(0));
+        m_leftMotor.stopMotor();
     }
 
-   // Inside Shooter.java
-@Override
-public void periodic() {
-    // Current draws help you see if a motor is straining
-    double leftCurrent = m_leftMotor.getStatorCurrent().getValueAsDouble();
-    double rightCurrent = m_rightMotor.getStatorCurrent().getValueAsDouble();
-    
-    // Temperatures let you know if you're geared too high
-    double leftTemp = m_leftMotor.getDeviceTemp().getValueAsDouble();
-    
-    SmartDashboard.putNumber("Diagnostics/Shooter Temp (C)", leftTemp);
-    SmartDashboard.putNumber("Diagnostics/Shooter Amps", leftCurrent);
-
-    // Alert the driver if the motors are getting dangerously hot (over 70C)
-    if (leftTemp > 70.0) {
-        SmartDashboard.putBoolean("Diagnostics/SHOOTER OVERHEATING", true);
-    } else {
-        SmartDashboard.putBoolean("Diagnostics/SHOOTER OVERHEATING", false);
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Shooter/Current RPM", getCurrentRPM());
+        SmartDashboard.putNumber("Shooter/Target RPM", m_targetRPM);
+        SmartDashboard.putBoolean("Shooter/At Speed", isAtSpeed(150));
     }
-}
 }
