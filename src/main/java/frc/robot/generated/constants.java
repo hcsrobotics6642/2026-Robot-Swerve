@@ -19,6 +19,8 @@ public class constants {
      //Turret
      public static final int kTurretCanId = 28;
      public static final int kTurretEncoderCanId = 31;
+     public static final double kTurretMinAngle = -90.0; // Degrees
+     public static final double kTurretMaxAngle = 90.0;  // Degrees
 
     //Hopper
      public static final int kHopper_LeftCanId = 23;
