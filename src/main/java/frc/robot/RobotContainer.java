@@ -75,32 +75,17 @@ public class RobotContainer {
         return NetworkTableInstance.getDefault().getTable("limelight-climber").getEntry("tx").getDouble(0);
     }
     
-    public void periodic() {
-    SmartDashboard.putNumber("Intake/Front Amps", m_intake.getFrontCurrent());
-    SmartDashboard.putNumber("Intake/Rear Amps", m_intake.getRearCurrent());
-    
-    // If current is over 35 Amps, warn the driver with a big red box
-    SmartDashboard.putBoolean("Intake/JAMMED", m_intake.getFrontCurrent() > 35.0);
-}
+    // periodic() is kept empty to avoid duplicating the background thread logic
+    public void periodic() {} 
 
-    // In RobotContainer.java periodic()
-
-    public void checkSystemHealth() {
-    // If the intake is pulling more than 35 Amps, it's jammed!
-    if (m_intake.getFrontCurrent() > 35.0) {
-        m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5);
-    } else {
-        m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0);
-    }
-}
     private void configureBindings() {
         /* --- PATHPLANNER / NAMED COMMANDS --- */
         NamedCommands.registerCommand("START", Start_Match);
         NamedCommands.registerCommand("Shoot", Shoot);
         NamedCommands.registerCommand("Climb", Climb);
         
-        // New Vision Commands for Auto
-        NamedCommands.registerCommand("AutoPrep", ReadyToShoot.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance));
+        // Ensure both Auto and Teleop use the exact same command name!
+        NamedCommands.registerCommand("AutoPrep", VisionAimAndReady.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance));
         NamedCommands.registerCommand("AlignToTower", 
             drivetrain.applyRequest(() -> drive.withRotationalRate(getClimberTagOffset() * -0.05))
             .until(() -> Math.abs(getClimberTagOffset()) < 1.0).withTimeout(2.0));
@@ -114,40 +99,33 @@ public class RobotContainer {
             )
         );
 
-        // Reset Heading
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-        // Drive Team Intake (Parallel logic for indexer)
         m_driverController.leftTrigger().whileTrue(Commands.parallel(
             new RunIntake(m_intake, -0.9, 0.9),
             Commands.startEnd(() -> m_indexer.setPercent(-0.4), m_indexer::stop, m_indexer)
         ));
 
-        // Point wheels (restored from original)
         m_driverController.start().and(m_driverController.b()).whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
         ));
 
-        // SysId Routines (restored from original)
         m_driverController.back().and(m_driverController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
         m_driverController.back().and(m_driverController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         m_driverController.start().and(m_driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         m_driverController.start().and(m_driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         /* --- OPERATOR CONTROLS (Port 1) --- */
-        
-        // Scoring Logic
+        // FIX: Replaced ReadyToShoot with VisionAimAndReady to match Auto!
         m_operatorController.start().toggleOnTrue(
-            ReadyToShoot.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
+            VisionAimAndReady.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
         );
         m_operatorController.rightTrigger().whileTrue(new FireFuel(m_intake, m_indexer, m_shooter, m_turret, m_operatorController));
-        // In RobotContainer.configureButtonBindings()
+        
         m_operatorController.povUp().whileTrue(m_climber.run(() -> m_climber.moveManual(0.2)));
         m_operatorController.povDown().whileTrue(m_climber.run(() -> m_climber.moveManual(-0.2)));
         m_operatorController.povCenter().onTrue(m_climber.runOnce(() -> m_climber.moveManual(0)));
 
-
-        // Manual Setpoints
         m_operatorController.a().onTrue(new SetHoodAngle(m_hood, 15.0));
         m_operatorController.y().onTrue(new SequentialCommandGroup(
             new L_Three_Climb(m_climber, 22.0),
@@ -165,27 +143,35 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
+        /* --- BACKGROUND HEALTH MONITOR --- */
+        Commands.run(() -> {
+            double amps = m_intake.getFrontCurrent(); 
+            SmartDashboard.putNumber("Intake/Front Amps", amps);
+            SmartDashboard.putBoolean("Intake/JAMMED", amps > 35.0);
+            
+            if (amps > 35.0) {
+                m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5);
+            } else {
+                m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0);
+            }
+        }, m_intake).ignoringDisable(true).schedule(); 
+        
+        // FIX: Restored Swerve Telemetry!
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
-        public Command systemCheckCommand() {
-    return Commands.sequence(
-        Commands.print("Starting System Check..."),
-        // 1. Twitch the Intake
-        m_intake.runOnce(() -> m_intake.setSpeed(0.2, 0.2)).withTimeout(0.5),
-        m_intake.runOnce(() -> m_intake.stop()),
-        
-        // 2. Nudge the Turret
-        m_turret.runOnce(() -> m_turret.setSpeed(0.1)).withTimeout(0.3),
-        m_turret.runOnce(() -> m_turret.stop()),
-        
-        // 3. Spin Shooter slowly
-        m_shooter.runOnce(() -> m_shooter.setRPM(500)).withTimeout(1.0),
-        m_shooter.runOnce(() -> m_shooter.stop()),
-        
-        Commands.print("System Check Complete!")
-    ).ignoringDisable(false); // Only runs when enabled
-}
+    public Command systemCheckCommand() {
+        return Commands.sequence(
+            Commands.print("Starting System Check..."),
+            m_intake.runOnce(() -> m_intake.setSpeed(0.2, 0.2)).withTimeout(0.5),
+            m_intake.runOnce(() -> m_intake.stop()),
+            m_turret.runOnce(() -> m_turret.setSpeed(0.1)).withTimeout(0.3),
+            m_turret.runOnce(() -> m_turret.stop()),
+            m_shooter.runOnce(() -> m_shooter.setRPM(500)).withTimeout(1.0),
+            m_shooter.runOnce(() -> m_shooter.stop()),
+            Commands.print("System Check Complete!")
+        ).ignoringDisable(false); 
+    }
    
     public Command getAutonomousCommand() {
         final var idle = new SwerveRequest.Idle();

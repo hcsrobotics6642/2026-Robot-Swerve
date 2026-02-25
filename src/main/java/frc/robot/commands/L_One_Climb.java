@@ -17,12 +17,6 @@ public class L_One_Climb extends Command {
     }
 
     @Override
-    public void initialize() {
-        // Tell the subsystem to go to the calculated rotation count
-        m_climber.setClimbPosition(m_targetRotations);
-    }
-
-    @Override
     public boolean isFinished() {
         // Ends the command when we are within 1 rotation of the goal
         return Math.abs(m_climber.getLeaderPosition() - m_targetRotations) < 1.0;
@@ -34,5 +28,14 @@ public class L_One_Climb extends Command {
         if (interrupted) {
             m_climber.stopMotor();
         }
+   
+    }
+@Override
+public void initialize() {
+    // Safety: Don't move if we are already at the top or bottom limits
+    if (m_targetRotations > 0 && m_targetRotations < 500) { 
+        m_climber.setClimbPosition(m_targetRotations);
     }
 }
+}
+
