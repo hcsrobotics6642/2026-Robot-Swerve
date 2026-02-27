@@ -64,6 +64,8 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
+
+        
     }
 
     private double getLimelightDistance() {
@@ -120,13 +122,20 @@ public class RobotContainer {
         m_operatorController.start().toggleOnTrue(
             VisionAimAndReady.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
         );
-        m_operatorController.rightTrigger().whileTrue(new FireFuel(m_intake, m_indexer, m_shooter, m_turret, m_operatorController));
+        m_operatorController.rightTrigger().whileTrue(
+        new FireFuel(m_intake, m_indexer, m_shooter, m_turret, m_operatorController, this::getLimelightDistance)
+        );
+        // Rev the shooter to 4000 RPM while the right bumper is held
+        m_operatorController.rightBumper().whileTrue(
+        new Shooter_test(m_shooter)
+        );
+      
         
         m_operatorController.povUp().whileTrue(m_climber.run(() -> m_climber.moveManual(0.2)));
         m_operatorController.povDown().whileTrue(m_climber.run(() -> m_climber.moveManual(-0.2)));
         m_operatorController.povCenter().onTrue(m_climber.runOnce(() -> m_climber.moveManual(0)));
 
-        m_operatorController.a().onTrue(new SetHoodAngle(m_hood, 15.0));
+        //m_operatorController.a().onTrue(new SetHoodAngle(m_hood, 15.0));
         m_operatorController.y().onTrue(new SequentialCommandGroup(
             new L_Three_Climb(m_climber, 22.0),
             new WaitCommand(0.5),
@@ -134,7 +143,7 @@ public class RobotContainer {
             new WaitCommand(0.5),
             new L_Three_Climb(m_climber, 22.0)
         ));
-        m_operatorController.b().onTrue(new InstantCommand(() -> m_turret.setAngle(90.0), m_turret));
+        //m_operatorController.b().onTrue(new InstantCommand(() -> m_turret.setAngle(90.0), m_turret));
         m_operatorController.x().whileTrue(new RunIntakeOut(m_intake, 0.9, -0.9));
 
         /* --- SYSTEM UTILITIES --- */

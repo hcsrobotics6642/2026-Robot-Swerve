@@ -29,6 +29,7 @@ public class Hood extends SubsystemBase {
         m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_pid.setTolerance(0.5); 
     }
+    
 
     @Override
     public void periodic() {

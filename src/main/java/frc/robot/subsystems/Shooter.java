@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage; // For RPM control
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue; // For inversion logic
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -26,6 +27,7 @@ public class Shooter extends SubsystemBase {
         config.CurrentLimits.StatorCurrentLimit = 80.0; 
         config.CurrentLimits.StatorCurrentLimitEnable = true;
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
         // PID Gains (Slot 0) - These are starting points
         config.Slot0.kP = constants.kShooter_kP;
