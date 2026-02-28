@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -104,10 +105,32 @@ public class RobotContainer {
 
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-        m_driverController.leftTrigger().whileTrue(Commands.parallel(
+        m_driverController.rightBumper().whileTrue(Commands.parallel(
             new RunIntake(m_intake, -0.9, 0.9),
-            Commands.startEnd(() -> m_indexer.setPercent(-0.4), m_indexer::stop, m_indexer)
+            Commands.startEnd(() -> m_indexer.setPercent(-0.6), m_indexer::stop, m_indexer)
         ));
+
+        //m_driverController.back().whileTrue(Commands.parallel(
+            //new SetHoodAngle(m_hood, 0.1),
+            //Commands.startEnd(() -> m_indexer.setPercent(-0.6), m_indexer::stop, m_indexer)
+        //));
+
+        // BACK BUTTON: Go one way at 10% speed
+    m_driverController.back().whileTrue(
+    new StartEndCommand(
+        () -> m_hood.setMainMotorSpeed(0.6),  // Match the name exactly!
+        () -> m_hood.setMainMotorSpeed(0.0),  
+        m_hood                       
+    ));
+
+    // START BUTTON: Go the other way at 10% speed
+    m_driverController.start().whileTrue(
+    new StartEndCommand(
+        () -> m_hood.setMainMotorSpeed(-0.6), // Match the name exactly!
+        () -> m_hood.setMainMotorSpeed(0.0),  
+        m_hood                       
+    ));
+
 
         m_driverController.start().and(m_driverController.b()).whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
@@ -150,8 +173,15 @@ public class RobotContainer {
         //m_operatorController.b().onTrue(new InstantCommand(() -> m_turret.setAngle(90.0), m_turret));
        m_operatorController.x().whileTrue(Commands.parallel(
             new RunIntakeOut(m_intake, 0.9, -0.9),
-            new RunIndexer(m_indexer, 0.4) // Adjust 0.4 to -0.4 if it spins the wrong way!
+            new RunIndexer(m_indexer, 0.6) // Adjust 0.4 to -0.4 if it spins the wrong way!
         ));
+
+        m_operatorController.a().whileTrue(Commands.parallel(
+            new RunIntake(m_intake, -0.9, 0.9),
+            Commands.startEnd(() -> m_indexer.setPercent(-0.6), m_indexer::stop, m_indexer)
+        ));
+
+
 
         /* --- SYSTEM UTILITIES --- */
         final var idle = new SwerveRequest.Idle();
@@ -182,6 +212,8 @@ public class RobotContainer {
 
     public void setLimelightPipeline(int pipeline) {
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setNumber(pipeline);
+
+    
 }
     public Command systemCheckCommand() {
         return Commands.sequence(

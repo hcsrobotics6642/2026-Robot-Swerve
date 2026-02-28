@@ -8,12 +8,14 @@ public class SetHoodAngle extends Command {
     private final double m_angle;
 
     /**
-     * @param hood The hood subsystem
+     * Creates a new command to set the hood angle.
+     * * @param hood  The hood subsystem
      * @param angle The target angle in degrees
      */
     public SetHoodAngle(Hood hood, double angle) {
-        m_hood = hood;
-        m_angle = angle;
+        this.m_hood = hood;
+        this.m_angle = angle;
+        
         // Require the hood so no two commands try to move it at once
         addRequirements(m_hood);
     }

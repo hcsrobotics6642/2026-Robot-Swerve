@@ -63,6 +63,11 @@ public class Hood extends SubsystemBase {
         m_isClosedLoop = true;
     }
 
+    public void setMainMotorSpeed(double speed) {
+        m_isClosedLoop = false; 
+        m_motor.set(speed);
+    }
+
     public double getAngle() {
         // Rotations to Degrees minus the constant offset
         return (m_encoder.getAbsolutePosition().refresh().getValueAsDouble() * 360.0) - constants.kHoodOffset;
