@@ -4,8 +4,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
-// 2026 UPDATED: Top-level imports for Persist and Reset modes
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 
@@ -40,7 +39,13 @@ public class Climber extends SubsystemBase {
             ResetMode.kResetSafeParameters, 
             PersistMode.kPersistParameters
         );
+
+        Shuffleboard.getTab("Tuning").addPersistent("Climber kP", 2.0);
+        Shuffleboard.getTab("Tuning").addPersistent("Climber kI", 0.0);
+        Shuffleboard.getTab("Tuning").addPersistent("Climber kD", 0.1);
     }
+
+    
 
     public void moveManual(double speed) {
     // This stops the PID from fighting your manual input

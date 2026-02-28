@@ -6,7 +6,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.generated.constants;
 import com.ctre.phoenix6.hardware.CANcoder;
 
@@ -36,6 +36,8 @@ public class Turret extends SubsystemBase {
         
         m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_pid.setTolerance(1.0);
+
+        Shuffleboard.getTab("Tuning").add("Turret PID", m_pid);
     }
 
     @Override

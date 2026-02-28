@@ -64,6 +64,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
+        SmartDashboard.putData("Run System Check", systemCheckCommand());
 
         
     }
@@ -130,7 +131,10 @@ public class RobotContainer {
         new Shooter_test(m_shooter)
         );
       
-        
+       m_operatorController.leftBumper().whileTrue(
+        new TurretTrackTarget(m_turret, () -> getLimelightAngle(), this) // Pass 'this' here
+        );
+
         m_operatorController.povUp().whileTrue(m_climber.run(() -> m_climber.moveManual(0.2)));
         m_operatorController.povDown().whileTrue(m_climber.run(() -> m_climber.moveManual(-0.2)));
         m_operatorController.povCenter().onTrue(m_climber.runOnce(() -> m_climber.moveManual(0)));
@@ -144,7 +148,10 @@ public class RobotContainer {
             new L_Three_Climb(m_climber, 22.0)
         ));
         //m_operatorController.b().onTrue(new InstantCommand(() -> m_turret.setAngle(90.0), m_turret));
-        m_operatorController.x().whileTrue(new RunIntakeOut(m_intake, 0.9, -0.9));
+       m_operatorController.x().whileTrue(Commands.parallel(
+            new RunIntakeOut(m_intake, 0.9, -0.9),
+            new RunIndexer(m_indexer, 0.4) // Adjust 0.4 to -0.4 if it spins the wrong way!
+        ));
 
         /* --- SYSTEM UTILITIES --- */
         final var idle = new SwerveRequest.Idle();
@@ -169,11 +176,20 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
+    public double getLimelightAngle() {
+    // Aim relative to current position + offset
+    return m_turret.getAngle() + NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0.0);}
+
+    public void setLimelightPipeline(int pipeline) {
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setNumber(pipeline);
+}
     public Command systemCheckCommand() {
         return Commands.sequence(
             Commands.print("Starting System Check..."),
             m_intake.runOnce(() -> m_intake.setSpeed(0.2, 0.2)).withTimeout(0.5),
             m_intake.runOnce(() -> m_intake.stop()),
+            m_indexer.runOnce(() -> m_indexer.setPercent(0.3)).withTimeout(0.5),
+            m_indexer.runOnce(() -> m_indexer.stop()),
             m_turret.runOnce(() -> m_turret.setSpeed(0.1)).withTimeout(0.3),
             m_turret.runOnce(() -> m_turret.stop()),
             m_shooter.runOnce(() -> m_shooter.setRPM(500)).withTimeout(1.0),

@@ -2,34 +2,36 @@ package frc.robot.commands;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Turret;
+import java.util.function.DoubleSupplier; // 1. IMPORT THIS
 
 public class TurretTrackTarget extends Command {
     private final Turret m_turret;
+    private final DoubleSupplier m_angleSupplier; // 2. ADD THIS FIELD
+    private final RobotContainer m_container; // 2. ADD THIS FIELD
 
-    public TurretTrackTarget(Turret turret) {
+    // 3. UPDATE CONSTRUCTOR TO ACCEPT THE SUPPLIER
+    public TurretTrackTarget(Turret turret, DoubleSupplier angleSupplier, RobotContainer container) {
         m_turret = turret;
+        m_angleSupplier = angleSupplier;
+        m_container = container;
         addRequirements(m_turret);
     }
 
     @Override
+public void initialize() {
+    // Tell Limelight to use the pipeline that tracks the correct target
+    // Assume 0 is the tag for your alliance
+    m_container.setLimelightPipeline(0);
+}
+    @Override
     public void execute() {
-        // Get horizontal offset from Limelight
-        double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
+        // 4. USE THE SUPPLIER TO GET THE ANGLE
+        double targetAngle = m_angleSupplier.getAsDouble();
         
-        // Simple P-loop for tracking
-        double kP = 0.03; 
-        double min_command = 0.05;
-        
-        if (Math.abs(tx) > 1.0) { // Tolerance of 1 degree
-            double steering_adjust = kP * tx;
-            if (tx > 0) steering_adjust += min_command;
-            else steering_adjust -= min_command;
-            
-            m_turret.setSpeed(steering_adjust);
-        } else {
-            m_turret.stop();
-        }
+        // 5. USE PID TO AIM (Replaces the manual P-loop)
+        m_turret.setAngle(targetAngle);
     }
 
     @Override

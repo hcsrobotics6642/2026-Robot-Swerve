@@ -7,7 +7,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.ctre.phoenix6.hardware.CANcoder;
-
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,6 +28,8 @@ public class Hood extends SubsystemBase {
         // Applying 2026 configuration
         m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_pid.setTolerance(0.5); 
+
+        Shuffleboard.getTab("Tuning").add("Hood PID", m_pid);
     }
     
 
