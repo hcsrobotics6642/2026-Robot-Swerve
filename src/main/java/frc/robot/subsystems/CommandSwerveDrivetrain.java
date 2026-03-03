@@ -10,7 +10,10 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -35,7 +38,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
     private boolean m_hasAppliedOperatorPerspective = false;
-
+    
+    // FIX 1: Changed from ApplyChassisSpeeds to ApplyRobotSpeeds (CTRE 2025/2026 Standard)
+    private final SwerveRequest.ApplyRobotSpeeds AutoRequest = new SwerveRequest.ApplyRobotSpeeds();
+    
     /* --- RESTORED SYSID ROUTINES FROM ORIGINAL FILE --- */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
@@ -62,20 +68,56 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     /* Default routine to apply is translation */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
-    /* --- CONSTRUCTORS (Restored) --- */
+    /* --- CONSTRUCTORS --- */
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
         super(drivetrainConstants, modules);
         if (Utils.isSimulation()) { startSimThread(); }
+        configurePathPlanner(); 
     }
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants, double odometryUpdateFrequency, SwerveModuleConstants<?, ?, ?>... modules) {
         super(drivetrainConstants, odometryUpdateFrequency, modules);
         if (Utils.isSimulation()) { startSimThread(); }
+        configurePathPlanner(); 
     }
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants, double odometryUpdateFrequency, Matrix<N3, N1> odometryStandardDeviation, Matrix<N3, N1> visionStandardDeviation, SwerveModuleConstants<?, ?, ?>... modules) {
         super(drivetrainConstants, odometryUpdateFrequency, odometryStandardDeviation, visionStandardDeviation, modules);
         if (Utils.isSimulation()) { startSimThread(); }
+        configurePathPlanner(); 
+    }
+
+    /* --- PATHPLANNER CONFIGURATION --- */
+    private void configurePathPlanner() {
+        try {
+            // Loads your robot's physical settings directly from the PathPlanner GUI
+            RobotConfig config = RobotConfig.fromGUISettings();
+
+            AutoBuilder.configure(
+                () -> this.getState().Pose, // Method to get the robot's current position
+                this::resetPose, // FIX 2: Used resetPose instead of seedFieldCentric
+                () -> this.getState().Speeds, // Method to get current chassis speeds
+                (speeds, feedforwards) -> this.setControl(AutoRequest.withSpeeds(speeds)), // Drives the robot
+                new PPHolonomicDriveController(
+                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID (Moving X/Y)
+                    new PIDConstants(5.0, 0.0, 0.0)  // Rotation PID (Spinning)
+                ),
+                config, // Passes in the GUI configuration
+                () -> {
+                    // Automatically mirrors paths if you are on the Red Alliance
+                    var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red;
+                    }
+                    return false;
+                },
+                this // Require this subsystem so teleop doesn't fight auto
+            );
+        } catch (Exception e) {
+            // FIX 3: Corrected the reportError syntax
+            DriverStation.reportError("Failed to load PathPlanner config. Check your GUI settings!", false);
+            e.printStackTrace();
+        }
     }
 
     /* --- VISION LOGIC --- */
@@ -106,7 +148,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
     }
 
-    /* --- SYSID METHODS (Fixes the red underlines) --- */
+    /* --- SYSID METHODS --- */
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutineToApply.quasistatic(direction);
     }

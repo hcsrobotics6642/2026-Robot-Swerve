@@ -8,6 +8,9 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue; // For inversion logic
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.constants;
@@ -15,6 +18,14 @@ import frc.robot.generated.constants;
 public class Shooter extends SubsystemBase {
     private final TalonFX m_leftMotor = new TalonFX(constants.kShooter_LeftCanId);
     private final TalonFX m_rightMotor = new TalonFX(constants.kShooter_RightCanId);
+    // Create the Tab
+    private final ShuffleboardTab m_tab = Shuffleboard.getTab("Shooter System");
+
+    // Define the entries
+    private final GenericEntry m_leftRPMEntry = m_tab.add("Left Motor RPM", 0).getEntry();
+    private final GenericEntry m_targetRPMEntry = m_tab.add("Target RPM", 0).getEntry();
+    private final GenericEntry m_atSpeedEntry = m_tab.add("At Speed", false).getEntry();
+
     
     // Velocity request object - Phoenix 6 uses this for closed-loop control
     private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
@@ -71,5 +82,12 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Shooter/Current RPM", getCurrentRPM());
         SmartDashboard.putNumber("Shooter/Target RPM", m_targetRPM);
         SmartDashboard.putBoolean("Shooter/At Speed", isAtSpeed(150));
+        double currentRPM = Math.abs(m_leftMotor.getVelocity().getValueAsDouble() * 60.0);
+    
+    // Push the values to Shuffleboard
+    m_leftRPMEntry.setDouble(currentRPM);
+    m_targetRPMEntry.setDouble(m_targetRPM);
+    m_atSpeedEntry.setBoolean(isAtSpeed(100));
+
     }
 }

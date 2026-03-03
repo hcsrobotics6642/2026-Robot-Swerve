@@ -15,13 +15,13 @@ public class constants {
      //Hood
      public static final int kHoodEncoderCanId = 30;
      public static final int kHoodCanId = 29;
-     public static final int kHoodOffset = 0; // Adjust once the hood is working and we know what zero is
+     public static final double kHoodOffset = 17.2265625; // Adjust once the hood is working and we know what zero is
      //Turret
      public static final int kTurretCanId = 28;
      public static final int kTurretEncoderCanId = 31;
      public static final double kTurretMinAngle = -90.0; // Degrees
      public static final double kTurretMaxAngle = 90.0;  // Degrees
-     public static final int kTurretOffset = 0; // rawDegrees when turret points perfectly forward
+     public static final double kTurretOffset = -141.328125; // rawDegrees when turret points perfectly forward
 
     //Hopper
      public static final int kHopper_LeftCanId = 23;
