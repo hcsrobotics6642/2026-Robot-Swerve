@@ -35,7 +35,7 @@ public class ReadyToShoot {
             }, shooter),
             
             // Track Target with Turret 
-            new TurretTrackTarget(turret, () -> container.getLimelightAngle(), container),
+           // new TurretTrackTarget(turret, () -> container.getLimelightAngle(), container),
             
             // Constantly update hood angle based on distance supplier
             Commands.run(() -> hood.setAngleFromDistance(distanceSupplier.getAsDouble()), hood)

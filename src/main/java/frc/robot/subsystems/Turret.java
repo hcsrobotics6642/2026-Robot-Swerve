@@ -12,85 +12,145 @@ import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Turret extends SubsystemBase {
-    // 1. Create a dedicated Tab for this subsystem
-    private final ShuffleboardTab m_tab = Shuffleboard.getTab("Turret");
-    
-    private final SparkMax m_motor = new SparkMax(constants.kTurretCanId, MotorType.kBrushless);
-    private final CANcoder m_encoder = new CANcoder(constants.kTurretEncoderCanId);
-    private final PIDController m_pid = new PIDController(0.05, 0, 0);
 
-    private double m_targetAngle = 0;
+    private final SparkMax m_motor =
+            new SparkMax(constants.kTurretCanId, MotorType.kBrushless);
+
+    private final CANcoder m_encoder =
+            new CANcoder(constants.kTurretEncoderCanId);
+
+    private final PIDController m_pid =
+            new PIDController(constants.kTurretP,
+                              constants.kTurretI,
+                              constants.kTurretD);
+
+    private double m_targetAngle = constants.kTurretCenterAngle;
     private boolean m_isClosedLoop = false;
 
     public Turret() {
-        // 2. Add the PID Controller to the dashboard so we can tune P, I, and D live
-        m_tab.add("Turret PID", m_pid);
-        
-        // Also add it to a general "Tuning" tab for convenience
-        Shuffleboard.getTab("Tuning").add("Turret PID Object", m_pid);
 
         SparkMaxConfig config = new SparkMaxConfig();
-        config.smartCurrentLimit(25).idleMode(IdleMode.kBrake);
+        config.smartCurrentLimit(25)
+              .idleMode(IdleMode.kBrake);
 
-        /* * NOTE: If kTurretMaxAngle is red, you MUST add it to constants.java. 
-         * For now, I've left these active assuming you will add them next.
-         */
-        config.softLimit
-            .forwardSoftLimit(constants.kTurretMaxAngle)
-            .forwardSoftLimitEnabled(true)
-            .reverseSoftLimit(constants.kTurretMinAngle)
-            .reverseSoftLimitEnabled(true);
-        
-        m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_motor.configure(config,
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
+
         m_pid.setTolerance(1.0);
+
+        // AUTO CENTER ON BOOT
+        setAngle(constants.kTurretCenterAngle);
     }
 
     @Override
     public void periodic() {
+
         double currentAngle = getAngle();
-        
-        if (m_isClosedLoop) {
-            double output = m_pid.calculate(currentAngle, m_targetAngle);
-            m_motor.set(output);
+
+        // Emergency hard stop
+        if (currentAngle > constants.kTurretMaxAngle + 2 ||
+            currentAngle < constants.kTurretMinAngle - 2) {
+
+            m_motor.stopMotor();
+            m_isClosedLoop = false;
+            return;
         }
 
-        // 3. Telemetry: Send data to the dashboard every loop
-        SmartDashboard.putNumber("Turret/Current Angle", currentAngle);
-        SmartDashboard.putNumber("Turret/Target Angle", m_targetAngle);
-        
-        // Display raw sensor data to help calibrate your constants.kTurretOffset
-        SmartDashboard.putNumber("Turret/Raw Encoder", m_encoder.getAbsolutePosition().getValueAsDouble() * 360.0);
+        if (m_isClosedLoop) {
+
+            double output = m_pid.calculate(currentAngle, m_targetAngle);
+
+            output = MathUtil.clamp(
+                    output,
+                    -constants.kTurretMaxOutput,
+                     constants.kTurretMaxOutput);
+
+            m_motor.set(output);
+        }
     }
 
-    public void setAngle(double degrees) {
-        m_targetAngle = MathUtil.clamp(degrees, constants.kTurretMinAngle, constants.kTurretMaxAngle);
-        m_isClosedLoop = true;
+   public void setAngle(double degrees) {
+
+    double normalized = normalizeAngle(degrees);
+
+    if (!isWithinLimits(normalized)) {
+        normalized = closestLimit(normalized);
     }
+
+    m_targetAngle = normalized;
+    m_isClosedLoop = true;
+}
 
     public void setSpeed(double speed) {
-        m_isClosedLoop = false; 
+
+        m_isClosedLoop = false;
+
+        speed = MathUtil.clamp(
+                speed,
+                -constants.kTurretMaxOutput,
+                 constants.kTurretMaxOutput);
+
         m_motor.set(speed);
     }
 
     public double getAngle() {
-        /* * 2026 UPDATE: .refresh() is critical for Phoenix 6. 
-         * It ensures we aren't using "stale" data from the previous loop.
-         */
-        return (m_encoder.getAbsolutePosition().refresh().getValueAsDouble() * 360.0) - constants.kTurretOffset;
+
+        return (m_encoder.getAbsolutePosition()
+                .refresh()
+                .getValueAsDouble() * 360.0)
+                - constants.kTurretOffset;
     }
 
-    public boolean isAtPosition(double target, double tolerance) {
-        return Math.abs(getAngle() - target) < tolerance;
+    public boolean isLocked(double targetAngle) {
+        return Math.abs(getAngle() - targetAngle)
+                < constants.kTurretLockToleranceDeg;
     }
 
+    private double normalizeAngle(double angle) {
+    angle %= 360.0;
+    if (angle < 0) angle += 360.0;
+    return angle;
+}
+
+private boolean isWithinLimits(double angle) {
+
+    double min = constants.kTurretMinAngle;
+    double max = constants.kTurretMaxAngle;
+
+    // Wrapped range case
+    if (min > max) {
+        return angle >= min || angle <= max;
+    }
+
+    // Normal range
+    return angle >= min && angle <= max;
+}
+
+private double closestLimit(double angle) {
+
+    double min = constants.kTurretMinAngle;
+    double max = constants.kTurretMaxAngle;
+
+    double distToMin = angularDistance(angle, min);
+    double distToMax = angularDistance(angle, max);
+
+    return distToMin < distToMax ? min : max;
+}
+
+private double angularDistance(double a, double b) {
+    double diff = Math.abs(a - b) % 360;
+    return diff > 180 ? 360 - diff : diff;
+}
     public void stop() {
         m_isClosedLoop = false;
         m_motor.stopMotor();
+    }
+
+    public void centerTurret() {
+        setAngle(constants.kTurretCenterAngle);
     }
 }

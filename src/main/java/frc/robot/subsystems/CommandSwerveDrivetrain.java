@@ -133,8 +133,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-        updatePoseFromLimelight("limelight");
-        updatePoseFromLimelight("limelight-climber");
+        updatePoseFromLimelight("limelight-front");
+        //updatePoseFromLimelight("limelight-climber");
 
         Pose2d pose = getState().Pose;
         SmartDashboard.putNumber("Robot X", pose.getX());

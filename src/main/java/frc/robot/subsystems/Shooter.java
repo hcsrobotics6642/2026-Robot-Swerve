@@ -2,92 +2,93 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VelocityVoltage; // For RPM control
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue; // For inversion logic
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.generated.constants;
 
 public class Shooter extends SubsystemBase {
-    private final TalonFX m_leftMotor = new TalonFX(constants.kShooter_LeftCanId);
-    private final TalonFX m_rightMotor = new TalonFX(constants.kShooter_RightCanId);
-    // Create the Tab
-    private final ShuffleboardTab m_tab = Shuffleboard.getTab("Shooter System");
 
-    // Define the entries
-    private final GenericEntry m_leftRPMEntry = m_tab.add("Left Motor RPM", 0).getEntry();
-    private final GenericEntry m_targetRPMEntry = m_tab.add("Target RPM", 0).getEntry();
-    private final GenericEntry m_atSpeedEntry = m_tab.add("At Speed", false).getEntry();
+    private final TalonFX m_leftMotor =
+            new TalonFX(constants.kShooter_LeftCanId);
 
-    
-    // Velocity request object - Phoenix 6 uses this for closed-loop control
-    private final VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
+    private final TalonFX m_rightMotor =
+            new TalonFX(constants.kShooter_RightCanId);
+
+    private final VelocityVoltage m_velocityRequest =
+            new VelocityVoltage(0);
+
     private double m_targetRPM = 0;
 
+    private final InterpolatingDoubleTreeMap m_rpmMap =
+            new InterpolatingDoubleTreeMap();
+
     public Shooter() {
+
         TalonFXConfiguration config = new TalonFXConfiguration();
-        
-        // Safety & Physics
-        config.CurrentLimits.StatorCurrentLimit = 80.0; 
+
+        config.CurrentLimits.StatorCurrentLimit = 80.0;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-        // PID Gains (Slot 0) - These are starting points
         config.Slot0.kP = constants.kShooter_kP;
         config.Slot0.kV = constants.kShooter_kV;
 
-        // Apply config to the leader motor
         m_leftMotor.getConfigurator().apply(config);
-        
-        // Right motor follows left, but spins in the OPPOSITE direction 
-        // to propel the game piece forward.
-        m_rightMotor.setControl(new Follower(m_leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+
+        m_rightMotor.setControl(
+                new Follower(
+                        m_leftMotor.getDeviceID(),
+                        MotorAlignmentValue.Opposed));
+
+        // Distance → RPM map (tune these)
+        m_rpmMap.put(1.5, 2800.0);
+        m_rpmMap.put(2.0, 3200.0);
+        m_rpmMap.put(2.5, 3600.0);
+        m_rpmMap.put(3.0, 4100.0);
+        m_rpmMap.put(3.5, 4600.0);
     }
 
-    /**
-     * Set the target speed of the shooter.
-     * @param targetRPM The desired speed in Revolutions Per Minute.
-     */
     public void setRPM(double targetRPM) {
+
         m_targetRPM = targetRPM;
-        // Phoenix 6 expects Rotations Per Second (RPS)
+
         double targetRPS = targetRPM / 60.0;
-        m_leftMotor.setControl(m_velocityRequest.withVelocity(targetRPS));
+
+        m_leftMotor.setControl(
+                m_velocityRequest.withVelocity(targetRPS));
+    }
+
+    public void setRPMFromDistance(double distanceMeters) {
+
+        distanceMeters = MathUtil.clamp(distanceMeters, 1.2, 4.0);
+
+        double rpm = m_rpmMap.get(distanceMeters);
+
+        setRPM(rpm);
     }
 
     public double getCurrentRPM() {
-        // Refresh the signal and convert RPS to RPM
-        return m_leftMotor.getVelocity().refresh().getValueAsDouble() * 60.0;
+        return m_leftMotor.getVelocity()
+                .refresh()
+                .getValueAsDouble() * 60.0;
     }
 
-    public boolean isAtSpeed(double toleranceRPM) {
-        return Math.abs(getCurrentRPM() - m_targetRPM) < toleranceRPM;
+    public boolean isAtSpeed() {
+        return Math.abs(getCurrentRPM() - m_targetRPM)
+                < constants.kShooterToleranceRPM;
     }
 
     public void stop() {
         m_targetRPM = 0;
         m_leftMotor.stopMotor();
-    }
-
-    @Override
-    public void periodic() {
-        SmartDashboard.putNumber("Shooter/Current RPM", getCurrentRPM());
-        SmartDashboard.putNumber("Shooter/Target RPM", m_targetRPM);
-        SmartDashboard.putBoolean("Shooter/At Speed", isAtSpeed(150));
-        double currentRPM = Math.abs(m_leftMotor.getVelocity().getValueAsDouble() * 60.0);
-    
-    // Push the values to Shuffleboard
-    m_leftRPMEntry.setDouble(currentRPM);
-    m_targetRPMEntry.setDouble(m_targetRPM);
-    m_atSpeedEntry.setBoolean(isAtSpeed(100));
-
     }
 }

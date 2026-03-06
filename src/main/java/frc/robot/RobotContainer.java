@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import java.util.Map; 
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.constants; 
 import frc.robot.subsystems.*;
@@ -79,7 +79,11 @@ public class RobotContainer {
         setupDashboard();
         configureBindings();
         SmartDashboard.putData("Run System Check", systemCheckCommand());
-        
+                m_smartShootToggle = Shuffleboard
+       .getTab("Driver")
+       .add("Smart Shooting Enabled", constants.kEnableSmartShooting)
+       .withWidget(BuiltInWidgets.kToggleSwitch)
+       .getEntry();
         // This must be called AFTER configureBindings() so it knows about your NamedCommands!
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Routine", autoChooser);
@@ -151,16 +155,33 @@ public class RobotContainer {
         m_operatorController.start().toggleOnTrue(
         VisionAimAndReady.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
         );
-        m_operatorController.rightTrigger().whileTrue(
-            new FireFuel(m_intake, m_indexer, m_shooter, m_turret, m_operatorController, this::getLimelightDistance)
-        );
+        //m_operatorController.rightTrigger().whileTrue(
+           // new FireFuel(m_intake, m_indexer, m_shooter, m_turret, m_operatorController, this::getLimelightDistance)
+       // );
+
+
+m_operatorController.rightTrigger().whileTrue(
+    new PoseSmartFire(
+        m_shooter,
+        m_turret,
+        m_intake,
+        m_indexer,
+        drivetrain,
+        this::getLimelightDistance,
+        () -> m_smartShootToggle.getBoolean(constants.kEnableSmartShooting)
+    )
+);
+
+
+
+
         m_operatorController.rightBumper().whileTrue(
             new Shooter_test(m_shooter)
         );
       
-       m_operatorController.leftBumper().whileTrue(
-            new TurretTrackTarget(m_turret, () -> getLimelightAngle(), this) 
-        );
+       //m_operatorController.leftBumper().whileTrue(
+         //   new TurretTrackTarget(m_turret, () -> getLimelightAngle(), this) 
+      //  );
 
         // Move Up while holding POV Up
         m_operatorController.povUp().whileTrue(
@@ -217,21 +238,22 @@ public class RobotContainer {
         
         drivetrain.registerTelemetry(logger::telemeterize);
     }
-
+    private final GenericEntry m_smartShootToggle;
     private void setupDashboard() {
+
         ShuffleboardTab driverTab = Shuffleboard.getTab("Driver");
 
-        driverTab.addBoolean("READY TO FIRE", () -> {
+        //driverTab.addBoolean("READY TO FIRE", () -> {
             // UPDATED NAMES HERE
-            boolean hasTarget = NetworkTableInstance.getDefault().getTable("limelight_tauret").getEntry("tv").getDouble(0) == 1.0;
-            boolean turretLocked = Math.abs(NetworkTableInstance.getDefault().getTable("limelight_tauret").getEntry("tx").getDouble(0)) < 2.0;
-            boolean shooterReady = m_shooter.isAtSpeed(100);
-            return hasTarget && turretLocked && shooterReady;
-        })
-        .withWidget(BuiltInWidgets.kBooleanBox)
-        .withPosition(0, 0)
-        .withSize(3, 3)
-        .withProperties(Map.of("Color when true", "Lime", "Color when false", "Red"));
+          //  boolean hasTarget = NetworkTableInstance.getDefault().getTable("limelight_tauret").getEntry("tv").getDouble(0) == 1.0;
+           // boolean turretLocked = Math.abs(NetworkTableInstance.getDefault().getTable("limelight_tauret").getEntry("tx").getDouble(0)) < 2.0;
+            //boolean shooterReady = m_shooter.isAtSpeed(100);
+           // return hasTarget && turretLocked && shooterReady;
+       // })
+        //.withWidget(BuiltInWidgets.kBooleanBox)
+       // .withPosition(0, 0)
+       // .withSize(3, 3)
+       // .withProperties(Map.of("Color when true", "Lime", "Color when false", "Red"));
 
         // FIX: Using an explicit lambda here stops the (String, Shooter) compiler crash!
         driverTab.addDouble("Shooter RPM", () -> m_shooter.getCurrentRPM())
@@ -270,6 +292,9 @@ public class RobotContainer {
         .withPosition(7, 2) 
         .withSize(2, 1)
         .withProperties(Map.of("min", -30, "max", 30)); 
+
+
+
     }
 
     public double getLimelightAngle() {
