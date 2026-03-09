@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.8191118872295426,
-        "y": 3.9436697864302004
+        "x": 3.3280128205128223,
+        "y": 4.046628205128206
       },
       "isLocked": false,
       "linkedName": "Blue Start Center"
     },
     {
       "anchor": {
-        "x": 2.508488636363636,
-        "y": 4.035
+        "x": 2.723346153846155,
+        "y": 4.045306818181818
       },
       "prevControl": {
-        "x": 2.343632532507195,
-        "y": 4.222942717393558
+        "x": 3.3047564102564126,
+        "y": 4.05825641025641
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "blue shoot 1"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": "blue",

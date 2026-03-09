@@ -24,13 +24,13 @@ public class TunerConstants {
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     private static final Slot0Configs steerGains = new Slot0Configs()
-        .withKP(50).withKI(0).withKD(1)
-        .withKS(0.1).withKV(1.50).withKA(0)
+        .withKP(20).withKI(0).withKD(1)
+        .withKS(0.0).withKV(0).withKA(0)
         .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
     private static final Slot0Configs driveGains = new Slot0Configs()
-        .withKP(50).withKI(0).withKD(0)
+        .withKP(50).withKI(0).withKD(0.25)
         .withKS(0).withKV(0.124);
 
     // The closed-loop output type to use for the steer motors;
@@ -129,7 +129,7 @@ public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDr
     private static final int kFrontLeftDriveMotorId = 3;
     private static final int kFrontLeftSteerMotorId = 4;
     private static final int kFrontLeftEncoderId = 5;
-    private static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.13427734375);
+    private static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.138184);
     private static final boolean kFrontLeftSteerMotorInverted = true;
     private static final boolean kFrontLeftEncoderInverted = false;
 
@@ -140,7 +140,7 @@ public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDr
     private static final int kFrontRightDriveMotorId = 0;
     private static final int kFrontRightSteerMotorId = 1;
     private static final int kFrontRightEncoderId = 2;
-    private static final Angle kFrontRightEncoderOffset = Rotations.of(0.295166015625);
+    private static final Angle kFrontRightEncoderOffset = Rotations.of(0.297119 );
     private static final boolean kFrontRightSteerMotorInverted = true;
     private static final boolean kFrontRightEncoderInverted = false;
 
@@ -151,7 +151,7 @@ public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDr
     private static final int kBackLeftDriveMotorId = 6;
     private static final int kBackLeftSteerMotorId = 7;
     private static final int kBackLeftEncoderId = 8;
-    private static final Angle kBackLeftEncoderOffset = Rotations.of(-0.482177734375);
+    private static final Angle kBackLeftEncoderOffset = Rotations.of(-0.483643);
     private static final boolean kBackLeftSteerMotorInverted = true;
     private static final boolean kBackLeftEncoderInverted = false;
 
@@ -162,7 +162,7 @@ public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDr
     private static final int kBackRightDriveMotorId = 9;
     private static final int kBackRightSteerMotorId = 10;
     private static final int kBackRightEncoderId = 11;
-    private static final Angle kBackRightEncoderOffset = Rotations.of(-0.265625);
+    private static final Angle kBackRightEncoderOffset = Rotations.of(-0.252930);
     private static final boolean kBackRightSteerMotorInverted = true;
     private static final boolean kBackRightEncoderInverted = false;
     private static final Distance kBackRightXPos = Inches.of(-10);

@@ -17,6 +17,8 @@ import java.util.Map;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -47,8 +49,10 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     /* Controllers */
-    private final CommandXboxController m_driverController = new CommandXboxController(0);
-    private final CommandXboxController m_operatorController = new CommandXboxController(1);
+    private final CommandXboxController m_operatorController = new CommandXboxController(0);
+    private final CommandXboxController m_driverController = new CommandXboxController(1);
+    private final CommandXboxController m_driverController1 = new CommandXboxController(2);
+
 
     /* Subsystems */
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -115,32 +119,21 @@ public class RobotContainer {
         /* --- DRIVER CONTROLS (Port 0) --- */
         drivetrain.setDefaultCommand(
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed)
-                     .withVelocityY(-m_driverController.getLeftX() * MaxSpeed)
-                     .withRotationalRate(-m_driverController.getRightX() * MaxAngularRate)
+                drive.withVelocityX(m_driverController.getLeftY() * MaxSpeed)
+                     .withVelocityY(m_driverController.getLeftX() * MaxSpeed)
+                     .withRotationalRate(m_driverController1.getLeftX() * MaxAngularRate)
             )
         );
 
-        m_driverController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        m_driverController1.button(1).onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         m_driverController.rightBumper().whileTrue(Commands.parallel(
             new RunIntake(m_intake, -0.9, 0.9),
             Commands.startEnd(() -> m_indexer.setPercent(-0.6), m_indexer::stop, m_indexer)
         ));
 
-        m_driverController.back().whileTrue(
-        new StartEndCommand(
-            () -> m_hood.setMainMotorSpeed(0.6),  
-            () -> m_hood.setMainMotorSpeed(0.0),  
-            m_hood                       
-        ));
+ 
 
-        m_driverController.start().whileTrue(
-        new StartEndCommand(
-            () -> m_hood.setMainMotorSpeed(-0.6), 
-            () -> m_hood.setMainMotorSpeed(0.0),  
-            m_hood                       
-        ));
 
         m_driverController.start().and(m_driverController.b()).whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
@@ -152,41 +145,28 @@ public class RobotContainer {
         m_driverController.start().and(m_driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         /* --- OPERATOR CONTROLS (Port 1) --- */
-        m_operatorController.start().toggleOnTrue(
-        VisionAimAndReady.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
-        );
+      //  m_operatorController.start().toggleOnTrue(
+      //  VisionAimAndReady.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
+      //  );
         //m_operatorController.rightTrigger().whileTrue(
            // new FireFuel(m_intake, m_indexer, m_shooter, m_turret, m_operatorController, this::getLimelightDistance)
        // );
 
+       m_operatorController.back().whileTrue(m_hood.runEnd(() -> m_hood.setMainMotorSpeed(0.3d), () -> m_hood.stop()));
+       m_operatorController.start().whileTrue(m_hood.runEnd(() -> m_hood.setMainMotorSpeed(-0.3d), () -> m_hood.stop()));
 
-m_operatorController.rightTrigger().whileTrue(
-    new PoseSmartFire(
-        m_shooter,
-        m_turret,
-        m_intake,
-        m_indexer,
-        drivetrain,
-        this::getLimelightDistance,
-        () -> m_smartShootToggle.getBoolean(constants.kEnableSmartShooting)
-    )
-);
-
-
-
-
-        m_operatorController.rightBumper().whileTrue(
+        m_operatorController.rightTrigger().whileTrue(
             new Shooter_test(m_shooter)
         );
       
-       //m_operatorController.leftBumper().whileTrue(
-         //   new TurretTrackTarget(m_turret, () -> getLimelightAngle(), this) 
-      //  );
+       m_operatorController.leftBumper().whileTrue(
+         new TurretTrackTarget(m_turret, () -> getLimelightAngle(), this) 
+       );
 
         // Move Up while holding POV Up
         m_operatorController.povUp().whileTrue(
             m_climber.startEnd(
-                () -> m_climber.moveManual(0.2), // Start action
+                () -> m_climber.moveManual(-0.3), // Start action
                 () -> m_climber.stopMotor()      // End action
             )
         );
@@ -194,7 +174,7 @@ m_operatorController.rightTrigger().whileTrue(
         // Move Down while holding POV Down
         m_operatorController.povDown().whileTrue(
             m_climber.startEnd(
-                () -> m_climber.moveManual(-0.2), // Start action
+                () -> m_climber.moveManual(0.3), // Start action
                 () -> m_climber.stopMotor()       // End action
             )
         );

@@ -43,7 +43,7 @@ public class Turret extends SubsystemBase {
         m_pid.setTolerance(1.0);
 
         // AUTO CENTER ON BOOT
-        setAngle(constants.kTurretCenterAngle);
+       // setAngle(constants.kTurretCenterAngle);
     }
 
     @Override
