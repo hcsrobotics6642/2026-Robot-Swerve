@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.constants; 
 import frc.robot.subsystems.*;
@@ -225,10 +224,24 @@ public class RobotContainer {
             new RunIntake(m_intake, -0.9, 0.9)
         );
 
+        m_operatorController.b().whileTrue(
+            new RunHopperIntake(m_intake, 0.75)
+        );
+
+        /*m_operatorController.iftherobotdoesn'tdrive().whileTrue(
+            new CrashOut(m_crashingOut, 100)
+        );*/
         // Operator Right Trigger: Unified Smart Fire
         m_operatorController.rightTrigger().whileTrue(
             new FireFuel(m_shooter, m_turret, m_intake, this::getLimelightDistance, this::getLimelightTX)
         );
+
+        // --- REAR INTAKE DEPLOYMENT ---
+        // Hold Left Bumper to push the hopper out at 20% speed
+        m_operatorController.leftBumper().whileTrue(new EjectHopper(m_hopper, 0.20));
+
+        // Hold Right Bumper to pull the hopper back in at 20% speed
+        m_operatorController.rightBumper().whileTrue(new EjectHopper(m_hopper, -0.20));
         
         /* --- SYSTEM UTILITIES --- */
         final var idle = new SwerveRequest.Idle();

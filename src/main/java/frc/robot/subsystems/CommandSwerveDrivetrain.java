@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
@@ -38,7 +38,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
     private boolean m_hasAppliedOperatorPerspective = false;
-    
+    private final Field2d m_field = new Field2d();
     // FIX 1: Changed from ApplyChassisSpeeds to ApplyRobotSpeeds (CTRE 2025/2026 Standard)
     private final SwerveRequest.ApplyRobotSpeeds AutoRequest = new SwerveRequest.ApplyRobotSpeeds();
     
@@ -73,18 +73,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         super(drivetrainConstants, modules);
         if (Utils.isSimulation()) { startSimThread(); }
         configurePathPlanner(); 
+        SmartDashboard.putData("Field", m_field);
     }
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants, double odometryUpdateFrequency, SwerveModuleConstants<?, ?, ?>... modules) {
         super(drivetrainConstants, odometryUpdateFrequency, modules);
         if (Utils.isSimulation()) { startSimThread(); }
         configurePathPlanner(); 
+        SmartDashboard.putData("Field", m_field);
     }
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants, double odometryUpdateFrequency, Matrix<N3, N1> odometryStandardDeviation, Matrix<N3, N1> visionStandardDeviation, SwerveModuleConstants<?, ?, ?>... modules) {
         super(drivetrainConstants, odometryUpdateFrequency, odometryStandardDeviation, visionStandardDeviation, modules);
         if (Utils.isSimulation()) { startSimThread(); }
         configurePathPlanner(); 
+        SmartDashboard.putData("Field", m_field);
     }
 
     /* --- PATHPLANNER CONFIGURATION --- */
@@ -139,6 +142,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         Pose2d pose = getState().Pose;
         SmartDashboard.putNumber("Robot X", pose.getX());
         SmartDashboard.putNumber("Robot Y", pose.getY());
+        
+        // YOU MISSED THIS LINE RIGHT HERE:
+        m_field.setRobotPose(pose);
 
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
