@@ -58,10 +58,17 @@ public class Hood extends SubsystemBase {
         SmartDashboard.putNumber("Hood/Raw Degrees", m_encoder.getAbsolutePosition().getValueAsDouble() * 360.0);
     }
 
-    public boolean isAtPosition() {
-        return Math.abs(getAngle() - m_targetAngle) < 1.0; // 1 degree of tolerance
+    public boolean isAtPosition(double target, double tolerance) {
+        return Math.abs(getAngle() - target) < tolerance;
     }
-    
+
+    /**
+     * Default version: Checks if the hood is at the internal target angle 
+     * with a default 1.0 degree tolerance.
+     */
+    public boolean isAtPosition() {
+        return Math.abs(getAngle() - m_targetAngle) < 1.0; 
+    }
     public void setAngleFromDistance(double distanceMeters) {
         // Clamp to match the map limits
         distanceMeters = MathUtil.clamp(distanceMeters, 1.5, 4.0);
