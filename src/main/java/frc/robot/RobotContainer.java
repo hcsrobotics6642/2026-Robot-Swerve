@@ -169,7 +169,6 @@ public class RobotContainer {
 
         m_driverController1.povUp().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-
         m_driverController.rightBumper().whileTrue(
             new RunIntake(m_intake, -0.9, 0.9)
         );
@@ -208,9 +207,16 @@ public class RobotContainer {
         );*/
 
 
+<<<<<<< HEAD
       
 
        
+=======
+        // Move Up while holding POV Up
+       m_operatorController.povUp().whileTrue(
+    new TrackTargetCommand(m_turret)
+);
+>>>>>>> d987f2f7cdc6a797e3c05f278709f98d5f65c349
 
 
 
@@ -296,12 +302,7 @@ public class RobotContainer {
 
 
         // FIX: Explicit lambda prevents the same issue here
-        driverTab.addDouble("Turret Angle", () -> m_turret.getAngle())
-        .withWidget(BuiltInWidgets.kDial)
-        .withPosition(5, 0)
-        .withSize(2, 2)
-        .withProperties(Map.of("min", constants.kTurretMinAngle, "max", constants.kTurretMaxAngle));
-
+       
 
         driverTab.addDouble("Target Distance", () -> getLimelightDistance())
         .withWidget(BuiltInWidgets.kNumberBar)
@@ -337,11 +338,6 @@ public class RobotContainer {
             .getEntry();
     }
 
-
-    public double getLimelightAngle() {
-        // UPDATED NAME HERE
-        return m_turret.getAngle() + NetworkTableInstance.getDefault().getTable("limelight_turret").getEntry("tx").getDouble(0.0);
-    }
 
 
     public void setLimelightPipeline(int pipeline) {
