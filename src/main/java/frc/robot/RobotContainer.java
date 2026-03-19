@@ -71,16 +71,9 @@ public class RobotContainer {
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
     private final Hopper m_hopper = new Hopper();
-<<<<<<< HEAD
-    private final Climber m_climber = new Climber();
-    private final Hood m_hood = new Hood();
-    private final Indexer m_indexer = new Indexer();
-    private final TurretSubsystem m_turret = new TurretSubsystem();
-=======
     private final Turret m_turret = new Turret();
     private final Hood m_hood = new Hood();
 
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
 
     /* --- THE AUTO CHOOSER --- */
     private final SendableChooser<Command> autoChooser;
@@ -89,7 +82,6 @@ public class RobotContainer {
     /* --- DASHBOARD ENTRIES --- */
     private GenericEntry m_smartShootToggle;
 
-    //limelight entry
      //Calculates the rotation speed needed to align the robot chassis with the Limelight target.
      
     private double getLimelightRotationRate() {
@@ -112,11 +104,8 @@ public class RobotContainer {
 
 
     /* Restored Command Groups */
-<<<<<<< HEAD
-=======
     /* Restored Command Groups */
     SequentialCommandGroup Start_Match = new SequentialCommandGroup();
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
 
 
     SequentialCommandGroup Shoot = new SequentialCommandGroup(
@@ -132,11 +121,8 @@ public class RobotContainer {
 
 
         SmartDashboard.putData("Run System Check", systemCheckCommand());
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
         // This must be called AFTER configureBindings() so it knows about your NamedCommands!
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Routine", autoChooser);
@@ -170,15 +156,8 @@ public class RobotContainer {
         /* --- PATHPLANNER / NAMED COMMANDS --- */
   
         NamedCommands.registerCommand("Shoot", Shoot);
-<<<<<<< HEAD
-        NamedCommands.registerCommand("Climb", Climb);
         
-        NamedCommands.registerCommand("AlignToTower", 
-            drivetrain.applyRequest(() -> drive.withRotationalRate(getClimberTagOffset() * -0.05))
-            .until(() -> Math.abs(getClimberTagOffset()) < 1.0).withTimeout(2.0));
-=======
-
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
+ 
 
         /* --- DRIVER CONTROLS (Port 0) --- */
         drivetrain.setDefaultCommand(
@@ -191,20 +170,16 @@ public class RobotContainer {
 
 
         m_driverController1.povUp().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-<<<<<<< HEAD
-        m_operatorController.leftBumper().whileTrue(new TurretTrackTarget(m_turret));
         m_driverController.rightBumper().whileTrue(Commands.parallel(
-            new RunIntake(m_intake, -0.9, 0.9),
-            Commands.startEnd(() -> m_indexer.setPercent(-0.6), m_indexer::stop, m_indexer)
+            new RunIntake(m_intake, -0.9, 0.9)
         ));
         
-=======
         m_operatorController.povUp().whileTrue( new TrackTargetCommand(m_turret));
+        m_operatorController.povRight().whileTrue(new Dougs_Turret_Test(m_turret));
 
         m_driverController.rightBumper().whileTrue(
             new RunIntake(m_intake, -0.9, 0.9)
         );
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
 
 
         m_driverController.start().and(m_driverController.b()).whileTrue(drivetrain.applyRequest(() ->
@@ -217,19 +192,11 @@ public class RobotContainer {
         m_driverController.start().and(m_driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         m_driverController.start().and(m_driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-<<<<<<< HEAD
       
 
        m_operatorController.back().whileTrue(m_hood.runEnd(() -> m_hood.setMainMotorSpeed(0.2d), () -> m_hood.stop()));
        m_operatorController.start().whileTrue(m_hood.runEnd(() -> m_hood.setMainMotorSpeed(-0.2d), () -> m_hood.stop()));
       
-        m_operatorController.povUp().whileTrue(
-            m_climber.startEnd(
-                () -> m_climber.moveManual(-0.3), // Start action
-                () -> m_climber.stopMotor()      // End action
-            )
-=======
-
         /* --- OPERATOR CONTROLS (Port 1) --- */
         //  m_operatorController.start().toggleOnTrue(
         //  VisionAimAndReady.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
@@ -262,7 +229,6 @@ public class RobotContainer {
 
         m_operatorController.x().whileTrue(
             new RunIntakeOut(m_intake, 0.9, -0.9)
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
         );
 
 
@@ -327,11 +293,8 @@ public class RobotContainer {
        
         drivetrain.registerTelemetry(logger::telemeterize);
     }
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
     private void setupDashboard() {
         
         ShuffleboardTab driverTab = Shuffleboard.getTab("Driver");
@@ -345,11 +308,8 @@ public class RobotContainer {
 
 
         // FIX: Explicit lambda prevents the same issue here
-<<<<<<< HEAD
 
-=======
        
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
 
         driverTab.addDouble("Target Distance", () -> getLimelightDistance())
         .withWidget(BuiltInWidgets.kNumberBar)
@@ -381,10 +341,7 @@ public class RobotContainer {
         
     }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
 
 
 
@@ -393,13 +350,8 @@ public class RobotContainer {
             Commands.print("Starting System Check..."),
             m_intake.runOnce(() -> m_intake.setSpeed(0.2, 0.2)).withTimeout(0.5),
             m_intake.runOnce(() -> m_intake.stop()),
-<<<<<<< HEAD
-            m_indexer.runOnce(() -> m_indexer.setPercent(0.3)).withTimeout(0.5),
-            m_indexer.runOnce(() -> m_indexer.stop()),     
-=======
             m_turret.runOnce(() -> m_turret.setSpeed(0.1)).withTimeout(0.3),
             m_turret.runOnce(() -> m_turret.stop()),
->>>>>>> 16f2aba67001669de0a5eff86518958c5eb0fe8c
             m_shooter.runOnce(() -> m_shooter.setRPM(500)).withTimeout(1.0),
             m_shooter.runOnce(() -> m_shooter.stop()),
             Commands.print("System Check Complete!")
