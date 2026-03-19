@@ -6,7 +6,7 @@ public class constants {
      //Intake
      public static final int kFrontIntakeCanId = 20;
      public static final int kRearIntakeCanId = 25;
-     
+     public static final int kHopperIntakeCanId = 32;
 
     //Shooter
      public static final int kShooter_LeftCanId = 21;
@@ -28,19 +28,16 @@ public class constants {
      public static final double kTurretCenterAngle = 120.0;
      public static final double kTurretMaxOutput = 0.6;
     //Hopper
-     public static final int kHopper_LeftCanId = 23;
-     public static final int kHopper_RightCanId = 24;
-     public static final int Hop_Inches = 12;
+     public static final int kHopper_ExpanderCanId = 23;
 
     //Climber
      public static final int kClimber_LeftCanId = 26;
      public static final int kClimber_RightCanId = 27;
-     // Inside constants.java
-     public static final int kIndexerCanId = 34;
-
+    
      // Shooter PID Constants
     public static final double kShooter_kP = 0.11; // Adjust if it's too slow to reach speed
     public static final double kShooter_kV = 0.12; // This handles the "Feed Forward" (Volts per RPS)
+    
     // =============================
 // Turret Configuration
 // =============================
@@ -64,7 +61,7 @@ public static final double kShooterToleranceRPM = 150.0;
 // =============================
 
 // Master enable for competition logic
-public static final boolean kEnableSmartShooting = true;
+public static boolean kEnableSmartShooting = true;
 
 // Require turret lock before feeding
 public static final boolean kRequireTurretLock = true;
