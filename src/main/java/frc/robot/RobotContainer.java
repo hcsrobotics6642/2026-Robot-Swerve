@@ -168,39 +168,14 @@ public class RobotContainer {
         
         m_operatorController.povRight().whileTrue(new Dougs_Turret_Test(m_turret));
         m_operatorController.povDown().whileTrue(new Turret_Home(m_turret));
-     
-
-
-      
-
-
-     
-      
-
-       m_operatorController.back().whileTrue(m_hood.runEnd(() -> m_hood.setMainMotorSpeed(0.2d), () -> m_hood.stop()));
-       m_operatorController.start().whileTrue(m_hood.runEnd(() -> m_hood.setMainMotorSpeed(-0.2d), () -> m_hood.stop()));
-      
-        /* --- OPERATOR CONTROLS (Port 1) --- */
-        //  m_operatorController.start().toggleOnTrue(
-        //  VisionAimAndReady.getCommand(m_shooter, m_turret, m_hood, this::getLimelightDistance)
-        //  );
-
-
-        m_operatorController.back().whileTrue(m_hood.runEnd(() -> m_hood.setMainMotorSpeed(0.2d), () -> m_hood.stop()));
-        m_operatorController.start().whileTrue(m_hood.runEnd(() -> m_hood.setMainMotorSpeed(-0.2d), () -> m_hood.stop()));
-
-
-      
 
         m_operatorController.x().whileTrue(
             new RunIntakeOut(m_intake, 0.9, -0.9)
         );
 
-
         m_operatorController.a().whileTrue(
             new RunIntake(m_intake, -0.9, 0.9)
         );
-
 
         m_operatorController.b().whileTrue(
             new RunHopperIntake(m_intake, 0.75)
@@ -213,8 +188,7 @@ public class RobotContainer {
         // --- REAR INTAKE DEPLOYMENT ---
         // Hold Left Bumper to push the hopper out at 20% speed
         m_operatorController.leftBumper().whileTrue(new EjectHopper(m_hopper, 0.20));
-
-
+        
         // Hold Right Bumper to pull the hopper back in at 20% speed
         m_operatorController.rightBumper().whileTrue(new EjectHopper(m_hopper, -0.20));
        
