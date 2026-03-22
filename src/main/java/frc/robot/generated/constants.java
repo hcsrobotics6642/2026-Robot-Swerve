@@ -16,6 +16,10 @@ public class constants {
      public static final int kHoodEncoderCanId = 30;
      public static final int kHoodCanId = 29;
      public static final double kHoodOffset = 17.2265625; // Adjust once the hood is working and we know what zero is
+    public static final double kLimelightMountAngle = 25.0; // degrees, adjust based on actual mounting
+    public static final double kLimelightHeight = 0.63; // meters, adjust based on actual mounting
+    public static final double kTargetHeight = 0.86; // meters, adjust based on actual target height
+    
      //Turret
      /*public static final double kTurretP = 0.05;
      public static final double kTurretI = 0.0;*/
