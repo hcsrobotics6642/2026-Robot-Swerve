@@ -85,7 +85,7 @@ public class RobotContainer {
      //Calculates the rotation speed needed to align the robot chassis with the Limelight target.
      
     private double getLimelightRotationRate() {
-        var table = NetworkTableInstance.getDefault().getTable("limelight_turret");
+        var table = NetworkTableInstance.getDefault().getTable("limelight-turret");
         double tv = table.getEntry("tv").getDouble(0); // 1.0 if target is found
         double tx = table.getEntry("tx").getDouble(0); // Degrees from center (-29.8 to 29.8)
 
@@ -124,13 +124,13 @@ public class RobotContainer {
 
 
     private double getLimelightTX() {
-        return NetworkTableInstance.getDefault().getTable("limelight_turret").getEntry("tx").getDouble(0);
+        return NetworkTableInstance.getDefault().getTable("limelight-turret").getEntry("tx").getDouble(0);
     }
 
 
     private double getLimelightDistance() {
         // UPDATED NAME HERE
-        double ty = NetworkTableInstance.getDefault().getTable("limelight_turret").getEntry("ty").getDouble(0);
+        double ty = NetworkTableInstance.getDefault().getTable("limelight-turret").getEntry("ty").getDouble(0);
         return (2.6 - 0.5) / Math.tan(Math.toRadians(30.0 + ty));
     }
 

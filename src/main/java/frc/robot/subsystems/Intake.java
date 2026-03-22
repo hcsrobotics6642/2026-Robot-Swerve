@@ -15,12 +15,8 @@ import frc.robot.generated.constants;
 
 public class Intake extends SubsystemBase {
 
-
-    // --- ORIGINAL FRONT INTAKE MOTORS ---
     private final SparkMax m_FrontMotor = new SparkMax(constants.kFrontIntakeCanId, MotorType.kBrushless);
     private final SparkMax m_RearMotor = new SparkMax(constants.kRearIntakeCanId, MotorType.kBrushless);
-   
-    // --- NEW DEPLOYABLE BACK INTAKE MOTOR ---
     private final SparkMax m_hopperintake = new SparkMax(constants.kHopperIntakeCanId, MotorType.kBrushless);
 
 
